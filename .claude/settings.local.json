@@ -1,0 +1,8 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(grep -v \"^/c/Projects/TemplatedRN/src/app$\")",
+      "Bash(grep -v \"^/c/Projects/TemplatedRN/src/common$\")"
+    ]
+  }
+}
