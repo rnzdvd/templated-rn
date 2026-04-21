@@ -19,7 +19,9 @@
     "store": "hygen store new",
     "setup": "hygen project setup",
     "storybook": "npm create storybook@latest",
-    "storybook-generate": "sb-rn-get-stories"
+    "storybook-generate": "sb-rn-get-stories",
+    "apk": "cd android && ./gradlew assembleRelease",
+    "aab": "cd android && ./gradlew bundleRelease"
   },
   "dependencies": {
     "@gorhom/bottom-sheet": "^5.2.9",
