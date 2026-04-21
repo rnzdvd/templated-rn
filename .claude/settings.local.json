@@ -2,7 +2,9 @@
   "permissions": {
     "allow": [
       "Bash(grep -v \"^/c/Projects/TemplatedRN/src/app$\")",
-      "Bash(grep -v \"^/c/Projects/TemplatedRN/src/common$\")"
+      "Bash(grep -v \"^/c/Projects/TemplatedRN/src/common$\")",
+      "mcp__context7__resolve-library-id",
+      "Bash(yarn add *)"
     ]
   }
 }
