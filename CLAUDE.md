@@ -38,7 +38,7 @@ yarn setup            # (Re)generates all common infrastructure files via hygen
 
 **TemplatedRN** is a React Native CLI template that enforces **Clean Architecture** across all feature modules.
 
-Every feature follows a strict layered structure: UI → Controller → UseCase → Gateway → Repository → Store → Presenter → UI. State is managed globally via **MobX**. HTTP calls go through **apisauce**. Navigation uses **React Navigation (native-stack)**. UI components use **React Native Paper**. Forms use **Formik + Yup**.
+Every feature follows a strict layered structure: UI → Controller → UseCase → Gateway → Repository → Store → Presenter → UI. State is managed globally via **MobX**. HTTP calls go through **apisauce**. Navigation uses **React Navigation (native-stack)**. UI components use **React Native Paper**. Forms use **Formik + Zod**.
 
 ---
 
@@ -51,7 +51,7 @@ Every feature follows a strict layered structure: UI → Controller → UseCase 
 | Navigation     | React Navigation (native-stack)      |
 | HTTP           | apisauce (axios wrapper)             |
 | UI Components  | React Native Paper                   |
-| Forms          | Formik + Yup                         |
+| Forms          | Formik + Zod                         |
 | Animations     | react-native-reanimated              |
 | Gestures       | react-native-gesture-handler         |
 | Safe Area      | react-native-safe-area-context       |

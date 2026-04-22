@@ -28,7 +28,7 @@ Identify from screenshot or Figma summary:
 
 - **Bottom tab bar?** → use Bottom Tab pattern.
 - **Tabs inside screen?** → use Inner-Screen Tab pattern.
-- **Form inputs?** → use Formik + Yup pattern.
+- **Form inputs?** → use Formik + Zod pattern.
 
 ## Phase 3: Implementation Patterns
 
@@ -43,7 +43,7 @@ Identify from screenshot or Figma summary:
 - `useState` in Container to toggle views.
 - Figma: map active/inactive variants to `activeTab` state.
 
-**Data Entry (Formik + Yup)** — `validationSchema` + `initialValues` in View.
+**Data Entry (Formik + Zod)** — `validate` + `initialValues` in View. Define schema with `z.object(...)`, use a `validateSchema` helper that calls `schema.safeParse()` and maps issues to Formik errors.
 
 - Define data shape in `form-models.ts`.
 - Figma: use field labels and placeholder text directly as props.
