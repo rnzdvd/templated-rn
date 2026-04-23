@@ -7,10 +7,19 @@ description: Wire a real API endpoint to an existing UI using Clean Architecture
 
 ## 🛠️ Phase 1: Dependency Mapping & Generation
 
-**Rule:** Never write files from scratch. Check for missing layers and generate them.
+**Rule:** Never write files from scratch. Always generate via hygen CLI args — Claude runs these directly, not the user:
+
+```bash
+npx hygen usecase new --module <module> --usecase <name>
+npx hygen gateway repo --module <module> --gateway <name>
+npx hygen controller new --module <module> --controller <name>
+npx hygen presenter new --module <module> --presenter <name>
+npx hygen store new --module <module> --store <name>
+npx hygen entity new --module <module> --entity <name>
+```
 
 1.  **Identify Missing Layers:** Search `src/<module>/` for: `entity`, `store`, `controller`, `repository`, `presenter`, `usecase`.
-2.  **Generate:** List the required `yarn` commands (e.g., `yarn case`, `yarn repo`) for the user to run.
+2.  **Generate:** Run the required hygen commands above for any missing layer.
 3.  **Read Base Classes:** To ensure correct inheritance, read:
     - `cat src/common/entities/base-api-mapped.entity.ts`
     - `cat src/common/gateways/api.gateway.ts`

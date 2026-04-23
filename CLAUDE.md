@@ -80,7 +80,7 @@ src/
 │   │   ├── api-config.ts   # ApiConfig + DEFAULT_API_CONFIG (reads BASE_URL from config.ts)
 │   │   ├── api-models.ts   # API response interfaces (e.g. ILoginResponseModel)
 │   │   └── api-utils.ts    # codeStatusChecker(status) utility
-│   ├── entites/            # Note: folder is spelled "entites" (typo in codebase)
+│   ├── entities/            # Note: folder is spelled "entities" (typo in codebase)
 │   │   ├── base.entity.ts            # IBaseEntity interface
 │   │   └── base-api-mapped.entity.ts # BaseApiMappedEntity: fromApiModel, fromManyApiModels, mock
 │   ├── gateways/

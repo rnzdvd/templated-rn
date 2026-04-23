@@ -4,7 +4,19 @@
       "Bash(grep -v \"^/c/Projects/TemplatedRN/src/app$\")",
       "Bash(grep -v \"^/c/Projects/TemplatedRN/src/common$\")",
       "mcp__context7__resolve-library-id",
-      "Bash(yarn add *)"
+      "Bash(yarn add *)",
+      "Bash(yarn screen *)",
+      "Bash(npx hygen *)",
+      "Bash(yarn hygen *)",
+      "Bash(./node_modules/.bin/hygen screen *)",
+      "Bash(./node_modules/.bin/hygen component *)",
+      "Bash(hygen screen *)",
+      "Bash(hygen component *)",
+      "Bash(yarn tsc *)",
+      "Bash(yarn lint *)",
+      "mcp__context7__query-docs",
+      "Bash(node -e \"const z = require\\('zod'\\); console.log\\(z.version || 'no version'\\)\")",
+      "Bash(node *)"
     ]
   }
 }

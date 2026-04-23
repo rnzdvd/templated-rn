@@ -1,5 +1,5 @@
 ---
-to: src/common/entites/base.entity.ts
+to: src/common/entities/base.entity.ts
 ---
 
 export interface IBaseEntity {

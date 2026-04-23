@@ -14,14 +14,29 @@ description: Build modals, bottom sheets, dialogs, or inline components (Contain
 
 ## Phase 1: Alignment
 
-Never create files manually. Read templates first:
+Never create files manually. Always generate via hygen CLI args — Claude runs this, not the user:
 
-- `cat _templates/component/new/container.tsx.t`
-- `cat _templates/component/new/view.tsx.t`
+```bash
+npx hygen component new --module <module> --component <name>
+```
 
-Instruct user to run `yarn component`. Never use `yarn screen` for this skill.
+Never use `yarn screen` or interactive `yarn component` prompts for this skill. After generation, fill in the scaffolded container and view files.
 
-## Phase 2: Pattern Selection
+**Container → View rule:**
+- Container is the `Observer` wrapper — owns `visible`/`onDismiss` state and any handler callbacks.
+- View is pure UI — no store access, all data via its `IXxxViewModel` interface.
+
+## Phase 2: Form Detection
+
+**Has form inputs?** → always use Formik + Zod, even if it's UI-only with no API wired yet. Never use plain `useState` for form fields.
+
+- Wrap the View's JSX in a `<Formik<IXxxFormModel>>` component with render props.
+- Define the Zod schema at the top of the View file with `z.object(...)`.
+- Pass a `validate` prop that calls `schema.safeParse()` and maps `flatten().fieldErrors` to Formik's errors shape.
+- Use `<HelperText type="error">` from RN Paper for inline validation messages.
+- Define the form data shape as an interface in `src/common/form-models.ts`.
+
+## Phase 4: Pattern Selection
 
 **Standard Modal / Bottom Sheet** — use RN `Modal`.
 
@@ -37,7 +52,7 @@ Instruct user to run `yarn component`. Never use `yarn screen` for this skill.
 
 - Manage `activeTab` state in the parent Container.
 
-## Phase 3: Implementation Rules
+## Phase 5: Implementation Rules
 
 - **View** — no store access; data via typed ViewModel interface only.
 - **Assets** — import from `assets/` via `require()`. Never store in `src/`.

@@ -1,5 +1,5 @@
 ---
-to: src/common/entites/base-api-mapped.entity.ts
+to: src/common/entities/base-api-mapped.entity.ts
 ---
 
 
