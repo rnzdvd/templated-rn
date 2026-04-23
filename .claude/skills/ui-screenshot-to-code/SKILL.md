@@ -21,6 +21,14 @@ npx hygen screen new --module <module> --screen <name>
 npx hygen component new --module <module> --component <name>
 ```
 
+**Naming rule:** screen and component must share the same base name. If the screen is `login`, the component is also `login` — not `login-form` or `login-screen`.
+
+Example — login screen in the `auth` module:
+```bash
+npx hygen screen new --module auth --screen login
+npx hygen component new --module auth --component login
+```
+
 Run these commands directly. Do not tell the user to run them — Claude runs them. After generation, fill in the scaffolded files with the actual implementation.
 
 Ask for the target module (e.g. `auth`, `profile`) if not already provided.
@@ -40,6 +48,7 @@ Identify from screenshot or Figma summary:
 - Container is the `Observer` wrapper — owns store wiring and passes typed props to View.
 - Handler functions that do **not** read observables (e.g. `onSubmit`, `onPress`) must be defined **outside** the `Observer` render callback — at module level or above the component return — so they are not recreated on every render.
 - View is pure UI — no store access, props only via its `IXxxViewModel` interface.
+- Always use `const` arrow functions instead of `function` declarations. This applies to `validate`, event handlers, and all module-level helpers in component files.
 
 **Bottom Navigation Tabs** — every tab needs `Screen → Container → View`.
 
@@ -52,19 +61,20 @@ Identify from screenshot or Figma summary:
 - `useState` in Container to toggle views.
 - Figma: map active/inactive variants to `activeTab` state.
 
-**Data Entry (Formik + Zod)** — always use `<Formik>` component with render props, even if the form is UI-only with no API wired yet. Never use plain `useState` for form fields.
+**Data Entry (Formik + Zod)** — always use `<Formik>` JSX component with render props **in the View file**. Never use `useFormik` hook. Never use plain `useState` for form fields.
 
-- Define the Zod schema at the top of the View file with `z.object(...)`.
-- Pass a `validate` prop that calls `schema.safeParse()` and maps `flatten().fieldErrors` to Formik's errors shape.
-- Use `<HelperText type="error">` from RN Paper to show inline validation messages.
+- Zod schema, `validate` function, and `initialValues` all live at the top of the View file.
+- `validate` calls `schema.safeParse()` and maps `flatten().fieldErrors` to Formik's errors shape.
+- Use `<HelperText type="error">` from RN Paper for inline validation messages.
 - Define the form data shape as an interface in `src/common/form-models.ts` and type `<Formik<IXxxFormModel>>`.
-- Figma: use field labels and placeholder text directly as props.
+- Container stays a plain Observer wrapper — no Formik logic in the container.
+- **UI first rule:** when the task is "create UI" or "create form", build the View with `<Formik>` and `onSubmit={() => {}}`. Do NOT wire controller calls, usecases, or API calls until the user explicitly asks to connect the API.
 
 ## Phase 4: Output Requirements
 
 In this order:
 
-1. Run `npx hygen screen new` and `npx hygen component new` with `--module` and `--name` CLI args.
+1. Run `npx hygen screen new --module <module> --screen <name>` and `npx hygen component new --module <module> --component <name>` using the same `<name>` for both.
 2. Fill in the generated scaffold files — screen renders container, container wires store + passes props, view is pure UI.
 3. Styles via `StyleSheet.create` + `Colors` from `src/common/colors.ts`. No inline hex codes.
 

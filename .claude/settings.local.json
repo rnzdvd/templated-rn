@@ -16,7 +16,9 @@
       "Bash(yarn lint *)",
       "mcp__context7__query-docs",
       "Bash(node -e \"const z = require\\('zod'\\); console.log\\(z.version || 'no version'\\)\")",
-      "Bash(node *)"
+      "Bash(node *)",
+      "Bash(yarn component *)",
+      "Bash(npx tsc *)"
     ]
   }
 }
