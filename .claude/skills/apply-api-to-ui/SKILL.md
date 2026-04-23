@@ -43,7 +43,7 @@ For each generated file, follow these project-specific logic rules:
 
 ## 🔗 Phase 4: UI Wiring
 
-- **Container:** Use `useContext(StoreContext)`. Trigger the controller in `useEffect`. Wrap the return in `<Observer>`.
+- **Container:** Use `useContext(StoreContext)`. Trigger the controller in `useEffect`. Wrap the return in `<Observer>`. Handler functions that do **not** read observables (e.g. `onSubmit`, `onPress`) must be defined **outside** the `Observer` render callback — at module level or above the component return.
 - **View:** Update `I<Name>ViewModel` to include `isLoading` and `error`. Render an `ActivityIndicator` if loading.
 
 ---

@@ -37,7 +37,8 @@ Identify from screenshot or Figma summary:
 
 **Screen → Container → View rule (always enforced):**
 - Screen renders Container (never the View directly).
-- Container is the `Observer` wrapper — owns handler callbacks and store wiring, passes typed props to View.
+- Container is the `Observer` wrapper — owns store wiring and passes typed props to View.
+- Handler functions that do **not** read observables (e.g. `onSubmit`, `onPress`) must be defined **outside** the `Observer` render callback — at module level or above the component return — so they are not recreated on every render.
 - View is pure UI — no store access, props only via its `IXxxViewModel` interface.
 
 **Bottom Navigation Tabs** — every tab needs `Screen → Container → View`.

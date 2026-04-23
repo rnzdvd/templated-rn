@@ -23,7 +23,8 @@ npx hygen component new --module <module> --component <name>
 Never use `yarn screen` or interactive `yarn component` prompts for this skill. After generation, fill in the scaffolded container and view files.
 
 **Container → View rule:**
-- Container is the `Observer` wrapper — owns `visible`/`onDismiss` state and any handler callbacks.
+- Container is the `Observer` wrapper — owns `visible`/`onDismiss` state and store wiring.
+- Handler functions that do **not** read observables (e.g. `onSubmit`, `onPress`) must be defined **outside** the `Observer` render callback — at module level or above the component return — so they are not recreated on every render.
 - View is pure UI — no store access, all data via its `IXxxViewModel` interface.
 
 ## Phase 2: Form Detection
