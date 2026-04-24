@@ -18,7 +18,8 @@
       "Bash(node -e \"const z = require\\('zod'\\); console.log\\(z.version || 'no version'\\)\")",
       "Bash(node *)",
       "Bash(yarn component *)",
-      "Bash(npx tsc *)"
+      "Bash(npx tsc *)",
+      "Bash(xargs wc *)"
     ]
   }
 }

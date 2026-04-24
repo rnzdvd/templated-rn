@@ -46,7 +46,8 @@ Identify from screenshot or Figma summary:
 **Screen → Container → View rule (always enforced):**
 - Screen renders Container (never the View directly).
 - Container is the `Observer` wrapper — owns store wiring and passes typed props to View.
-- Handler functions that do **not** read observables (e.g. `onSubmit`, `onPress`) must be defined **outside** the `Observer` render callback — at module level or above the component return — so they are not recreated on every render.
+- Handler functions that do **not** read observables must be defined **outside** the `Observer` render callback — at module level or above the component return — so they are not recreated on every render.
+- **Function naming:** props callbacks use `on` prefix (`onLogin`, `onDelete`); internal handlers use `handle` prefix (`handleLogin`, `handleDelete`).
 - View is pure UI — no store access, props only via its `IXxxViewModel` interface.
 - Always use `const` arrow functions instead of `function` declarations. This applies to `validate`, event handlers, and all module-level helpers in component files.
 
@@ -65,6 +66,7 @@ Identify from screenshot or Figma summary:
 
 - Zod schema, `validate` function, and `initialValues` all live at the top of the View file.
 - `validate` calls `schema.safeParse()` and maps `flatten().fieldErrors` to Formik's errors shape.
+- **Zod v4 format validators are top-level** — use `z.email()`, `z.url()`, `z.uuid()` directly, not `z.string().email()` / `z.string().url()` etc. (those are deprecated in v4). For length/regex constraints, `z.string().min()` / `.max()` / `.regex()` are still valid.
 - Use `<HelperText type="error">` from RN Paper for inline validation messages.
 - Define the form data shape as an interface in `src/common/form-models.ts` and type `<Formik<IXxxFormModel>>`.
 - Container stays a plain Observer wrapper — no Formik logic in the container.

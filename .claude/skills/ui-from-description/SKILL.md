@@ -66,7 +66,19 @@ Read the user's description and identify the layout pattern:
 
 ### Handler placement rule
 
-Handler functions that do **not** read observables (e.g. `onPress`, `onSubmit`) must be defined **outside** the `Observer` render callback — at module level or above the component return — so they are not recreated on every render.
+Handler functions that do **not** read observables must be defined **outside** the `Observer` render callback — at module level or above the component return — so they are not recreated on every render.
+
+### Function naming convention
+
+- **Props callbacks** (passed to a child) → `on` prefix: `onLogin`, `onDelete`, `onSubmit`
+- **Internal handlers** (not passed as props) → `handle` prefix: `handleLogin`, `handleDelete`
+
+```tsx
+// correct
+const handleLogin = (values: IFormModel) => { ... };  // internal — "handle"
+
+<ChildView onLogin={handleLogin} />                    // prop — "on"
+```
 
 ### `const` over `function` rule
 
@@ -84,6 +96,7 @@ function validate(values: IXxxFormModel) { ... }
 Always use `<Formik>` JSX component with render props **in the View file**. Never use `useFormik` hook. Never use plain `useState` for form fields.
 
 - Define the Zod schema at the top of the View file with `z.object(...)`.
+- **Zod v4 format validators are top-level** — use `z.email()`, `z.url()`, `z.uuid()` directly, not `z.string().email()` / `z.string().url()` etc. (those are deprecated in v4). For string length/regex constraints, `z.string().min()` / `.max()` / `.regex()` are still valid.
 - `validate` calls `schema.safeParse()` and maps `flatten().fieldErrors` to Formik's errors shape:
   ```ts
   const validate = (values: IXxxFormModel) => {
