@@ -40,13 +40,13 @@ For each generated file, follow these project-specific logic rules:
 - **Entity:** Implement `setFromApiModel`. Map `snake_case` (API) to `camelCase` (Class).
 - **Store:** Module-scoped (`<module>.store.ts`). Add feature-prefixed observables (e.g., `loginData`, `isLoading`, `error`). **Must** register in `src/app/store.ts` under the module key (e.g., `auth: new AuthStore()`). If the store already exists, add new observables to it — do not create a second store.
 - **Repository:** Create setter methods: `setX(data)`, `setIsLoading(bool)`, `setError(string)`. It can create getter methods also to get data for use case classes.
-- **UseCase:** 1. Set `isLoading(true)`. 2. Call `apiGateway`. 3. Validate with `codeStatusChecker(response.status_code)`. 4. If success: Map to Entity and call `repository.setX()`. 5. If fail: Call `repository.setError()`. 6. Set `isLoading(false)`.
-- **Controller:** Instantiate the Repository, Gateway, and UseCase. Expose an `execute` method.
+- **UseCase:** 1. Set `isLoading(true)`. 2. Call `apiGateway`. 3. Validate with `codeStatusChecker(response.status_code)` — **this is the only success check; never add `&& response.data.<field>`**. 4. If success: Map to Entity and call `repository.setX()`; set `repository.setIsSuccess(true)`. 5. If fail: Call `repository.setError()`; set `repository.setIsSuccess(false)`. 6. Set `isLoading(false)`. **Never call `showToast` here** — toast notifications belong in the Container.
+- **Controller:** Instantiate the Repository, Gateway, and UseCase. Expose an `execute` method. Returns `void` — never return data; callers read state via the Presenter.
 - **Presenter:** Create read-only getters for store data.
 
 ## 🔗 Phase 4: UI Wiring
 
-- **Container:** Use `useContext(StoreContext)`. Wrap the return in `<Observer>`. Internal handler functions must be defined **outside** the `Observer` render callback — above the return statement.
+- **Container:** Use `useContext(StoreContext)`. Wrap the return in `<Observer>`. Internal handler functions must be defined **outside** the `Observer` render callback — above the return statement. After `await controller.x()`, read outcome via `presenter.isSuccess()` / `presenter.getErrorMessage()` and call `showToast` here — not in the UseCase.
 - **View:** Update `I<Name>ViewModel` to include `isLoading` and `error`. Render an `ActivityIndicator` if loading.
 
 ### Function naming convention
@@ -55,6 +55,9 @@ For each generated file, follow these project-specific logic rules:
 |---|---|---|
 | Passed as a prop to a child component | `on` | `onLogin`, `onDelete`, `onSubmit` |
 | Internal handler (not a prop) | `handle` | `handleLogin`, `handleDelete` |
+| Navigation function in a Screen | `navigateTo<Destination>` | `navigateToHome`, `navigateToProfile` |
+
+> **Screen navigation handlers** must describe the destination, not the triggering action. Use `navigateToHome`, not `handleDeleteSuccess` or `handleNavigation`.
 
 ```tsx
 // Container — correct
@@ -87,5 +90,10 @@ interface ILoginViewModel {
 - [ ] Use `apisauce` methods only.
 - [ ] No direct store access from View/Controller.
 - [ ] All business logic stays in the UseCase.
+- [ ] UseCase success check uses `codeStatusChecker(response.status_code)` only — no `&& response.data.<field>` checks.
+- [ ] UseCase never calls `showToast` — toast notifications go in the Container.
+- [ ] Controller methods return `void` — never return data from a controller.
+- [ ] Container reads outcome via `presenter.isSuccess()` / `presenter.getErrorMessage()` after awaiting the controller.
 - [ ] Ensure `makeObservable` is in the Entity constructor.
 - [ ] Props callbacks use `on` prefix; internal handlers use `handle` prefix.
+- [ ] Navigation functions in Screens use `navigateTo<Destination>` prefix (e.g. `navigateToHome`, not `handleDeleteSuccess`).

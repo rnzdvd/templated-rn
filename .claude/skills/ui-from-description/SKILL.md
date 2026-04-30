@@ -72,10 +72,12 @@ Handler functions that do **not** read observables must be defined **outside** t
 
 - **Props callbacks** (passed to a child) → `on` prefix: `onLogin`, `onDelete`, `onSubmit`
 - **Internal handlers** (not passed as props) → `handle` prefix: `handleLogin`, `handleDelete`
+- **Navigation functions in a Screen** → `navigateTo<Destination>` prefix: `navigateToHome`, `navigateToProfile` — never `handleSuccess` or `handleNavigation`
 
 ```tsx
 // correct
 const handleLogin = (values: IFormModel) => { ... };  // internal — "handle"
+const navigateToHome = () => { navigation.navigate(...) };  // screen navigation — "navigateTo"
 
 <ChildView onLogin={handleLogin} />                    // prop — "on"
 ```

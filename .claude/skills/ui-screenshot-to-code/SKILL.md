@@ -47,7 +47,7 @@ Identify from screenshot or Figma summary:
 - Screen renders Container (never the View directly).
 - Container is the `Observer` wrapper — owns store wiring and passes typed props to View.
 - Handler functions that do **not** read observables must be defined **outside** the `Observer` render callback — at module level or above the component return — so they are not recreated on every render.
-- **Function naming:** props callbacks use `on` prefix (`onLogin`, `onDelete`); internal handlers use `handle` prefix (`handleLogin`, `handleDelete`).
+- **Function naming:** props callbacks use `on` prefix (`onLogin`, `onDelete`); internal handlers use `handle` prefix (`handleLogin`, `handleDelete`); navigation functions defined in a Screen use `navigateTo<Destination>` prefix (`navigateToHome`, `navigateToProfile`) — never `handleNavigation` or `handleSuccess`.
 - View is pure UI — no store access, props only via its `IXxxViewModel` interface.
 - Always use `const` arrow functions instead of `function` declarations. This applies to `validate`, event handlers, and all module-level helpers in component files.
 
