@@ -23,18 +23,21 @@ Never create files manually. Always generate via hygen CLI args — Claude runs 
 **Naming rule:** screen and component must share the same base name. If the screen is `login`, the component is also `login` — not `login-form` or `login-screen`.
 
 **Full screen:**
+
 ```bash
 npx hygen screen new --module <module> --screen <name>
 npx hygen component new --module <module> --component <name>
 ```
 
 Example — login screen in the `auth` module:
+
 ```bash
 npx hygen screen new --module auth --screen login
 npx hygen component new --module auth --component login
 ```
 
 **Component / modal only:**
+
 ```bash
 npx hygen component new --module <module> --component <name>
 ```
@@ -56,12 +59,12 @@ Read the user's description and identify the layout pattern:
 ### Screen → Container → View (full screen)
 
 - **Screen** — renders `<AppScreen barStyle=... statusBarBg=...>` wrapping the Container. Receives `IScreenContainer` props. Register in `screen-registry.ts` and `navigator.tsx` after creation.
-- **Container** — plain `<Observer>` wrapper. No Formik logic. No store wiring until the user asks to connect the API.
+- **Container** — plain `<Observer>` wrapper. No Formik logic. No store wiring until the user asks to connect the API. **Never access the store directly** — all state reads must go through the Presenter (e.g. `presenter.isLoading()`, never `store.auth.isLoading`).
 - **View** — pure UI. All data via its `IXxxViewModel` interface. No store access.
 
 ### Container → View (component / modal)
 
-- **Container** — plain `<Observer>` wrapper. Owns `visible` / `onDismiss` if it is an overlay.
+- **Container** — plain `<Observer>` wrapper. Owns `visible` / `onDismiss` if it is an overlay. **Never access the store directly** — all state reads must go through the Presenter.
 - **View** — pure UI. All data via its `IXxxViewModel` interface. No store access.
 
 ### Handler placement rule
@@ -85,6 +88,7 @@ const navigateToHome = () => { navigation.navigate(...) };  // screen navigation
 ### `const` over `function` rule
 
 Always use `const` arrow functions instead of `function` declarations in component files. This applies to helpers like `validate`, event handlers, and any other module-level or in-component functions:
+
 ```ts
 // correct
 const validate = (values: IXxxFormModel) => { ... };
@@ -106,7 +110,7 @@ Always use `<Formik>` JSX component with render props **in the View file**. Neve
     if (result.success) return {};
     const errors = result.error.flatten().fieldErrors;
     return Object.fromEntries(
-      Object.entries(errors).map(([k, v]) => [k, v?.[0] ?? '']),
+      Object.entries(errors).map(([k, v]) => [k, v?.[0] ?? ''])
     );
   };
   ```
@@ -118,34 +122,38 @@ Always use `<Formik>` JSX component with render props **in the View file**. Neve
 ## Phase 4: Overlay Patterns (component scope only)
 
 **Standard Modal:**
+
 - Dialog → `animationType="fade"`
 - Bottom Sheet → `animationType="slide"` + `TouchableOpacity` backdrop
 - Style: `borderRadius: 16`, `padding: 24`
 
 **Material Dialog (RN Paper):**
+
 - Use `<Dialog>` wrapped in `<Portal>`.
 - Structure: `Dialog.Title` + `Dialog.Content` + `Dialog.Actions`
 
 **Inline Tabs / Toggles:**
+
 - Use `<SegmentedButtons>` from RN Paper.
 - Manage `activeTab` in the Container.
 
 ## Phase 5: Rules
 
+- **Presenter-only store access** — Containers must never read from the store directly. Always use the Presenter (e.g. `presenter.isLoading()`, not `store.module.isLoading`). If a Presenter method is missing, add it to the Presenter first.
 - **Styles** — `StyleSheet.create()` + `Colors` from `src/common/colors.ts`. No inline hex codes.
 - **Assets** — import from `assets/` via `require()`. Never store in `src/`.
 - **New screen** — after creating, register the screen name in `src/app/screen-registry.ts` and add the `Stack.Screen` entry to `src/app/navigator.tsx`.
 
 ## UI Component Reference
 
-| Visual Element        | Paper Component                   |
-| :-------------------- | :-------------------------------- |
-| Headings              | `<Text variant="headlineMedium">` |
-| Body text             | `<Text variant="bodyMedium">`     |
-| Contained button      | `<Button mode="contained">`       |
-| Outlined button       | `<Button mode="outlined">`        |
-| Text inputs           | `<TextInput label="..." mode="outlined">` |
-| Inline error          | `<HelperText type="error">`       |
-| Screen wrapper        | `<AppScreen>`                     |
-| Tab toggle            | `<SegmentedButtons>`              |
-| Dialog                | `<Dialog>` inside `<Portal>`      |
+| Visual Element   | Paper Component                           |
+| :--------------- | :---------------------------------------- |
+| Headings         | `<Text variant="headlineMedium">`         |
+| Body text        | `<Text variant="bodyMedium">`             |
+| Contained button | `<Button mode="contained">`               |
+| Outlined button  | `<Button mode="outlined">`                |
+| Text inputs      | `<TextInput label="..." mode="outlined">` |
+| Inline error     | `<HelperText type="error">`               |
+| Screen wrapper   | `<AppScreen>`                             |
+| Tab toggle       | `<SegmentedButtons>`                      |
+| Dialog           | `<Dialog>` inside `<Portal>`              |

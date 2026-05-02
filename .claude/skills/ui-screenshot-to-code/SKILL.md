@@ -24,6 +24,7 @@ npx hygen component new --module <module> --component <name>
 **Naming rule:** screen and component must share the same base name. If the screen is `login`, the component is also `login` — not `login-form` or `login-screen`.
 
 Example — login screen in the `auth` module:
+
 ```bash
 npx hygen screen new --module auth --screen login
 npx hygen component new --module auth --component login
@@ -44,8 +45,9 @@ Identify from screenshot or Figma summary:
 ## Phase 3: Implementation Patterns
 
 **Screen → Container → View rule (always enforced):**
+
 - Screen renders Container (never the View directly).
-- Container is the `Observer` wrapper — owns store wiring and passes typed props to View.
+- Container is the `Observer` wrapper — owns store wiring and passes typed props to View. **Never access the store directly in a Container** — all state reads must go through the Presenter (e.g. `presenter.isLoading()`, never `store.module.isLoading`). If a Presenter method is missing, add it to the Presenter first.
 - Handler functions that do **not** read observables must be defined **outside** the `Observer` render callback — at module level or above the component return — so they are not recreated on every render.
 - **Function naming:** props callbacks use `on` prefix (`onLogin`, `onDelete`); internal handlers use `handle` prefix (`handleLogin`, `handleDelete`); navigation functions defined in a Screen use `navigateTo<Destination>` prefix (`navigateToHome`, `navigateToProfile`) — never `handleNavigation` or `handleSuccess`.
 - View is pure UI — no store access, props only via its `IXxxViewModel` interface.

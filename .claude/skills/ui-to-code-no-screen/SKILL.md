@@ -25,7 +25,8 @@ npx hygen component new --module <module> --component <name>
 Never use `yarn screen` or interactive `yarn component` prompts for this skill. After generation, fill in the scaffolded container and view files.
 
 **Container → View rule:**
-- Container is the `Observer` wrapper — owns `visible`/`onDismiss` state and store wiring.
+
+- Container is the `Observer` wrapper — owns `visible`/`onDismiss` state and store wiring. **Never access the store directly in a Container** — all state reads must go through the Presenter (e.g. `presenter.isLoading()`, never `store.module.isLoading`). If a Presenter method is missing, add it to the Presenter first.
 - Handler functions that do **not** read observables must be defined **outside** the `Observer` render callback — at module level or above the component return — so they are not recreated on every render.
 - **Function naming:** props callbacks use `on` prefix (`onLogin`, `onDelete`); internal handlers use `handle` prefix (`handleLogin`, `handleDelete`).
 - View is pure UI — no store access, all data via its `IXxxViewModel` interface.
@@ -61,6 +62,7 @@ Never use `yarn screen` or interactive `yarn component` prompts for this skill. 
 
 ## Phase 5: Implementation Rules
 
+- **Presenter-only store access** — Containers must never read from the store directly. Always use the Presenter. If a getter is missing, add it to the Presenter file before wiring the Container.
 - **View** — no store access; data via typed ViewModel interface only.
 - **Assets** — import from `assets/` via `require()`. Never store in `src/`.
 - **Styles** — `StyleSheet.create()` + `Colors` from `src/common/colors.ts`. No hex codes.

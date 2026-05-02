@@ -46,16 +46,16 @@ For each generated file, follow these project-specific logic rules:
 
 ## 🔗 Phase 4: UI Wiring
 
-- **Container:** Use `useContext(StoreContext)`. Wrap the return in `<Observer>`. Internal handler functions must be defined **outside** the `Observer` render callback — above the return statement. After `await controller.x()`, read outcome via `presenter.isSuccess()` / `presenter.getErrorMessage()` and call `showToast` here — not in the UseCase.
+- **Container:** Use `useContext(StoreContext)`. Wrap the return in `<Observer>`. Internal handler functions must be defined **outside** the `Observer` render callback — above the return statement. After `await controller.x()`, read outcome via `presenter.isSuccess()` / `presenter.getErrorMessage()` and call `showToast` here — not in the UseCase. **Never read from the store directly in a Container** — always go through the Presenter (e.g. `presenter.isLoading()`, not `store.auth.isLoading`).
 - **View:** Update `I<Name>ViewModel` to include `isLoading` and `error`. Render an `ActivityIndicator` if loading.
 
 ### Function naming convention
 
-| Location | Prefix | Example |
-|---|---|---|
-| Passed as a prop to a child component | `on` | `onLogin`, `onDelete`, `onSubmit` |
-| Internal handler (not a prop) | `handle` | `handleLogin`, `handleDelete` |
-| Navigation function in a Screen | `navigateTo<Destination>` | `navigateToHome`, `navigateToProfile` |
+| Location                              | Prefix                    | Example                               |
+| ------------------------------------- | ------------------------- | ------------------------------------- |
+| Passed as a prop to a child component | `on`                      | `onLogin`, `onDelete`, `onSubmit`     |
+| Internal handler (not a prop)         | `handle`                  | `handleLogin`, `handleDelete`         |
+| Navigation function in a Screen       | `navigateTo<Destination>` | `navigateToHome`, `navigateToProfile` |
 
 > **Screen navigation handlers** must describe the destination, not the triggering action. Use `navigateToHome`, not `handleDeleteSuccess` or `handleNavigation`.
 
@@ -69,7 +69,7 @@ return (
   <Observer>
     {() => (
       <LoginView
-        onLogin={handleLogin}   // prop → "on" prefix
+        onLogin={handleLogin} // prop → "on" prefix
       />
     )}
   </Observer>
@@ -79,7 +79,7 @@ return (
 ```tsx
 // View — correct
 interface ILoginViewModel {
-  onLogin: (values: ILoginFormModel) => void;  // prop → "on" prefix
+  onLogin: (values: ILoginFormModel) => void; // prop → "on" prefix
 }
 ```
 
@@ -88,7 +88,7 @@ interface ILoginViewModel {
 ## Checklist for Claude
 
 - [ ] Use `apisauce` methods only.
-- [ ] No direct store access from View/Controller.
+- [ ] No direct store access from View, Controller, or Container — all state reads go through the Presenter.
 - [ ] All business logic stays in the UseCase.
 - [ ] UseCase success check uses `codeStatusChecker(response.status_code)` only — no `&& response.data.<field>` checks.
 - [ ] UseCase never calls `showToast` — toast notifications go in the Container.
