@@ -11,21 +11,23 @@ description: Wire a real API endpoint to an existing UI using Clean Architecture
 
 ```bash
 npx hygen usecase new --module <module> --usecase <name>
-npx hygen gateway repo --module <module> --gateway <name>
+npx hygen gateway api --module <module> --gateway <name>
+npx hygen gateway repo --module <module> --repository <name>
 npx hygen controller new --module <module> --controller <name>
 npx hygen presenter new --module <module> --presenter <name>
 npx hygen store new --module <module> --store <module>
 npx hygen entity new --module <module> --entity <name>
 ```
 
-1.  **Identify Missing Layers:** Search `src/<module>/` for: `entity`, `store`, `controller`, `repository`, `presenter`, `usecase`.
+1.  **Identify Missing Layers:** Search `src/<module>/` for: `entity`, `store`, `controller`, `repository`, `gateway`, `presenter`, `usecase`.
 2.  **Generate:** Run the required hygen commands above for any missing layer.
+    - **Gateway rule:** Each module has its own gateway (`<module>.gateway.ts`) that extends `Api` directly — there is no shared `ApiGateway`. Generate with `npx hygen gateway api`.
     - **Store rule:** The store is **module-scoped**, not feature-scoped. It must be named after the module (e.g., `auth.store.ts` for the `auth` module), with class name `<Module>Store` (e.g., `AuthStore`). If `src/<module>/entities/<module>.store.ts` already exists, **do not generate a new one** — add new observables to the existing store instead.
     - **Store registration:** Register as `<module>: new <Module>Store()` in `src/app/store.ts` (e.g., `auth: new AuthStore()`).
     - **Observable naming:** Since one store serves multiple features, prefix observable names with the feature (e.g., `loginData` not `data`) to avoid collisions.
 3.  **Read Base Classes:** To ensure correct inheritance, read:
-    - `cat src/common/entities/base-api-mapped.entity.ts`
-    - `cat src/common/gateways/api.gateway.ts`
+    - `src/common/entities/base-api-mapped.entity.ts`
+    - `src/common/api/api.ts`
 
 ## 📡 Phase 2: API Contract Definition
 
@@ -39,8 +41,8 @@ For each generated file, follow these project-specific logic rules:
 
 - **Entity:** Implement `setFromApiModel`. Map `snake_case` (API) to `camelCase` (Class).
 - **Store:** Module-scoped (`<module>.store.ts`). Add feature-prefixed observables (e.g., `loginData`, `isLoading`, `error`). **Must** register in `src/app/store.ts` under the module key (e.g., `auth: new AuthStore()`). If the store already exists, add new observables to it — do not create a second store.
-- **Repository:** Create setter methods: `setX(data)`, `setIsLoading(bool)`, `setError(string)`. It can create getter methods also to get data for use case classes.
-- **UseCase:** 1. Set `isLoading(true)`. 2. Call `apiGateway`. 3. Validate with `codeStatusChecker(response.status_code)` — **this is the only success check; never add `&& response.data.<field>`**. 4. If success: Map to Entity and call `repository.setX()`; set `repository.setIsSuccess(true)`. 5. If fail: Call `repository.setError()`; set `repository.setIsSuccess(false)`. 6. Set `isLoading(false)`. **Never call `showToast` here** — toast notifications belong in the Container.
+- **Repository:** All mutations must be wrapped in `runInAction(() => { ... })` — never mutate store state outside `runInAction`. Create setter methods: `setX(data)`, `setIsLoading(bool)`, `setError(string)`, `clearError()`. It can create getter methods also to get data for use case classes.
+- **UseCase:** Wrap body in `try/catch`. On catch, call `this.repository.setError('Something went wrong')`. 1. Set `isLoading(true)`. 2. Call `gateway`. 3. Validate with `codeStatusChecker(response.status_code)` — **this is the only success check; never add `&& response.data.<field>`**. 4. If success: Map to Entity and call `repository.setX()`; set `repository.setIsSuccess(true)`; call `repository.clearError()`. 5. If fail: Call `repository.setError()`; set `repository.setIsSuccess(false)`. 6. Set `isLoading(false)`. **Never call `showToast` here** — toast notifications belong in the Container.
 - **Controller:** Instantiate the Repository, Gateway, and UseCase. Expose an `execute` method. Returns `void` — never return data; callers read state via the Presenter.
 - **Presenter:** Create read-only getters for store data.
 

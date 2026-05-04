@@ -23,6 +23,7 @@ yarn screen           # Creates screen.tsx
 yarn case             # Creates usecase.ts + test.ts
 yarn controller       # Creates controller.ts
 yarn presenter        # Creates presenter.ts
+yarn gateway          # Creates <module>.gateway.ts (per-module API gateway)
 yarn repo             # Creates repository.ts
 yarn store            # Creates store.ts
 yarn entity           # Creates entity.ts
@@ -38,7 +39,7 @@ yarn setup            # (Re)generates all common infrastructure files via hygen
 
 **TemplatedRN** is a React Native CLI template that enforces **Clean Architecture** across all feature modules.
 
-Every feature follows a strict layered structure: UI → Controller → UseCase → Gateway → Repository → Store → Presenter → UI. State is managed globally via **MobX**. HTTP calls go through **apisauce**. Navigation uses **React Navigation (native-stack)**. UI components use **React Native Paper**. Forms use **Formik + Zod**.
+Every feature follows a strict layered structure: UI → Controller → UseCase → Gateway → Repository → Store → Presenter → UI. State is managed globally via **MobX**. HTTP calls go through **apisauce**. Navigation uses **React Navigation (native-stack)**. UI components use **React Native Paper**. Forms use **React Hook Form + Zod**.
 
 ---
 
@@ -51,7 +52,7 @@ Every feature follows a strict layered structure: UI → Controller → UseCase 
 | Navigation     | React Navigation (native-stack)      |
 | HTTP           | apisauce (axios wrapper)             |
 | UI Components  | React Native Paper                   |
-| Forms          | Formik + Zod                         |
+| Forms          | React Hook Form + Zod                |
 | Animations     | react-native-reanimated              |
 | Gestures       | react-native-gesture-handler         |
 | Safe Area      | react-native-safe-area-context       |
@@ -83,15 +84,14 @@ src/
 │   ├── entities/            # Note: folder is spelled "entities" (typo in codebase)
 │   │   ├── base.entity.ts            # IBaseEntity interface
 │   │   └── base-api-mapped.entity.ts # BaseApiMappedEntity: fromApiModel, fromManyApiModels, mock
-│   ├── gateways/
-│   │   └── api.gateway.ts  # ApiGateway extends Api — add all API endpoint methods here
+│   ├── gateways/            # No module-specific gateways here — see per-module pattern below
 │   ├── ui/
 │   │   ├── app.screen.tsx        # AppScreen wrapper (IScreenContainer, IAppScreen props)
 │   │   ├── container.view.tsx    # SafeArea + KeyboardAvoid root container
 │   │   └── custom-status-bar.view.tsx
 │   ├── colors.ts           # All color constants
 │   ├── config.ts           # BASE_URL, SHOW_STORYBOOK flag
-│   ├── form-models.ts      # Form/request interfaces (e.g. ILoginFormModel)
+│   ├── form-schemas.ts     # Zod schemas + inferred types (e.g. LoginSchema, ILoginFormModel)
 │   └── utils.ts            # Shared utilities
 └── <module>/               # One folder per feature (e.g. auth, profile)
     ├── entities/
@@ -99,7 +99,8 @@ src/
     │   └── <n>.store.ts    # MobX store: makeAutoObservable in constructor
     ├── interfaces/
     │   ├── controllers/<n>.controller.ts   # Receives IStore; orchestrates use cases
-    │   ├── gateways/<n>.repository.ts      # Receives IStore; reads/writes store state
+    │   ├── gateways/<n>.gateway.ts         # Extends Api; module-specific HTTP endpoints
+    │   ├── gateways/<n>.repository.ts      # Receives IStore; all mutations via runInAction
     │   └── presenters/<n>.presenter.ts     # Receives IStore; read-only store projections
     ├── screens/<n>.screen.tsx              # Uses AppScreen; receives IScreenContainer props
     ├── ui/<component>/
@@ -134,7 +135,7 @@ No layer skips another. Data flows down through calls and up through MobX observ
 
 **API responses** are always shaped as `{ status_code: number; data: T }`. The interceptor in `api.ts` normalises both success and error responses into this envelope — use `codeStatusChecker` from `api-utils.ts` to interpret the status code.
 
-**MobX** is configured with `enforceActions: 'never'` (see `app.tsx`), so direct mutations on observables are allowed without wrapping in `action`.
+**MobX** is configured with `enforceActions: 'always'` (see `app.tsx`). All store mutations must go through the Repository layer and be wrapped in `runInAction(() => { ... })`. Never mutate store state outside a Repository.
 
 **Storybook** is toggled by `SHOW_STORYBOOK` in `src/common/config.ts`. When `true` in `__DEV__`, the app renders `StorybookUI` instead of Navigator. Set to `false` to run the normal app.
 
@@ -142,6 +143,8 @@ No layer skips another. Data flows down through calls and up through MobX observ
 1. Add screen name constant to `src/app/screen-registry.ts`
 2. Register the screen in the stack inside `src/app/navigator.tsx`
 3. Add the module's store instance to `getStore()` in `src/app/store.ts`
+
+**Store split rule** — one store per module by default. Split into a second store when either condition is true: (1) the store exceeds ~10 observables, or (2) two distinct feature domains exist in the same module (e.g. `auth` handling both login and user profile). Name split stores after the feature: `login.store.ts`, `profile.store.ts`.
 
 **Storybook stories** live alongside components in `.rnstorybook/`; run `yarn storybook-generate` after adding new stories.
 

@@ -48,18 +48,18 @@ Run the commands. After generation, fill in the scaffolded files with the actual
 
 Read the user's description and identify the layout pattern:
 
-- **Form inputs present?** → use Formik + Zod pattern (see Phase 3).
+- **Form inputs present?** → use React Hook Form + Zod pattern (see Phase 3).
 - **Tabs inside the screen?** → `useState` in Container to toggle views; no screen wrapper needed for tab content.
 - **List of items?** → use `FlatList` in the View; pass `data` and `renderItem` as props.
 - **Modal / bottom sheet / dialog?** → Container owns `visible` + `onDismiss`; choose the right overlay pattern (see Phase 4).
-- **Mixed (e.g. list + form)?** → combine patterns, Formik still lives in the View.
+- **Mixed (e.g. list + form)?** → combine patterns, React Hook Form still lives in the View.
 
 ## Phase 3: Implementation Patterns
 
 ### Screen → Container → View (full screen)
 
 - **Screen** — renders `<AppScreen barStyle=... statusBarBg=...>` wrapping the Container. Receives `IScreenContainer` props. Register in `screen-registry.ts` and `navigator.tsx` after creation.
-- **Container** — plain `<Observer>` wrapper. No Formik logic. No store wiring until the user asks to connect the API. **Never access the store directly** — all state reads must go through the Presenter (e.g. `presenter.isLoading()`, never `store.auth.isLoading`).
+- **Container** — plain `<Observer>` wrapper. No form logic. No store wiring until the user asks to connect the API. **Never access the store directly** — all state reads must go through the Presenter (e.g. `presenter.isLoading()`, never `store.auth.isLoading`).
 - **View** — pure UI. All data via its `IXxxViewModel` interface. No store access.
 
 ### Container → View (component / modal)
@@ -97,26 +97,52 @@ const validate = (values: IXxxFormModel) => { ... };
 function validate(values: IXxxFormModel) { ... }
 ```
 
-### Data Entry (Formik + Zod)
+### Data Entry (React Hook Form + Zod)
 
-Always use `<Formik>` JSX component with render props **in the View file**. Never use `useFormik` hook. Never use plain `useState` for form fields.
+Always use `useForm<IXxxFormModel>` with `resolver: zodResolver(XxxSchema)` **in the View file**. Never use plain `useState` for form fields. Never use Formik.
 
-- Define the Zod schema at the top of the View file with `z.object(...)`.
-- **Zod v4 format validators are top-level** — use `z.email()`, `z.url()`, `z.uuid()` directly, not `z.string().email()` / `z.string().url()` etc. (those are deprecated in v4). For string length/regex constraints, `z.string().min()` / `.max()` / `.regex()` are still valid.
-- `validate` calls `schema.safeParse()` and maps `flatten().fieldErrors` to Formik's errors shape:
+- Define the Zod schema in `src/common/form-schemas.ts` — never inline it in the View file:
   ```ts
-  const validate = (values: IXxxFormModel) => {
-    const result = schema.safeParse(values);
-    if (result.success) return {};
-    const errors = result.error.flatten().fieldErrors;
-    return Object.fromEntries(
-      Object.entries(errors).map(([k, v]) => [k, v?.[0] ?? ''])
-    );
-  };
+  // src/common/form-schemas.ts
+  import { z } from 'zod';
+
+  export const LoginSchema = z.object({
+    email: z.email(),
+    password: z.string().min(6),
+  });
+  ```
+- Import the schema in the View file and use `z.infer<typeof LoginSchema>` directly — no type alias needed:
+  ```ts
+  import { LoginSchema } from '../../common/form-schemas';
+
+  const { control, handleSubmit, formState: { errors } } = useForm<z.infer<typeof LoginSchema>>({
+    resolver: zodResolver(LoginSchema),
+  });
+  ```
+- **Zod v4 format validators are top-level** — use `z.email()`, `z.url()`, `z.uuid()` directly, not `z.string().email()` / `z.string().url()` etc. (those are deprecated in v4). For string length/regex constraints, `z.string().min()` / `.max()` / `.regex()` are still valid.
+- Use `Controller` from `react-hook-form` to wrap RN Paper inputs:
+  ```tsx
+  const { control, handleSubmit, formState: { errors } } = useForm<ILoginFormModel>({
+    resolver: zodResolver(LoginSchema),
+  });
+
+  <Controller
+    control={control}
+    name="email"
+    render={({ field: { onChange, onBlur, value } }) => (
+      <TextInput
+        label="Email"
+        mode="outlined"
+        onBlur={onBlur}
+        onChangeText={onChange}
+        value={value}
+      />
+    )}
+  />
+  <HelperText type="error">{errors.email?.message}</HelperText>
   ```
 - Use `<HelperText type="error">` from RN Paper for inline validation messages.
-- Define the form data shape as an interface in `src/common/form-models.ts` and type `<Formik<IXxxFormModel>>`.
-- Container stays a plain Observer wrapper — no Formik logic in the container.
+- Container stays a plain Observer wrapper — no form logic in the container.
 - **UI first rule:** `onSubmit={() => {}}` is always a no-op placeholder. Do NOT wire controller calls, usecases, or API calls until the user explicitly asks to connect the API.
 
 ## Phase 4: Overlay Patterns (component scope only)

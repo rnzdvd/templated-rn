@@ -34,15 +34,21 @@ Never use `yarn screen` or interactive `yarn component` prompts for this skill. 
 
 ## Phase 2: Form Detection
 
-**Has form inputs?** → always use `<Formik>` JSX component with render props **in the View file**. Never use `useFormik` hook. Never use plain `useState` for form fields.
+**Has form inputs?** → always use `useForm<IXxxFormModel>({ resolver: zodResolver(XxxSchema) })` **in the View file**. Never use plain `useState` for form fields. Never use Formik.
 
-- Zod schema, `validate` function, and `initialValues` all live at the top of the View file.
-- `validate` calls `schema.safeParse()` and maps `flatten().fieldErrors` to Formik's errors shape.
+- Zod schema lives in `src/common/form-schemas.ts` — never inline it in the View file:
+  ```ts
+  // src/common/form-schemas.ts
+  import { z } from 'zod';
+
+  export const LoginSchema = z.object({ ... });
+  ```
+- Import the schema in the View file and use `z.infer<typeof LoginSchema>` directly — no type alias needed. `useForm` call and `Controller` components live in the View body.
 - **Zod v4 format validators are top-level** — use `z.email()`, `z.url()`, `z.uuid()` directly, not `z.string().email()` / `z.string().url()` etc. (those are deprecated in v4). For length/regex constraints, `z.string().min()` / `.max()` / `.regex()` are still valid.
+- Use `Controller` from `react-hook-form` to wrap RN Paper inputs; expose errors via `formState.errors`.
 - Use `<HelperText type="error">` from RN Paper for inline validation messages.
-- Define the form data shape as an interface in `src/common/form-models.ts`.
-- Container stays a plain Observer wrapper — no Formik logic in the container.
-- **UI first rule:** set `onSubmit={() => {}}` as a no-op placeholder. Do NOT wire controller calls or API calls until the user explicitly asks to connect the API.
+- Container stays a plain Observer wrapper — no form logic in the container.
+- **UI first rule:** set `handleSubmit(() => {})` as a no-op placeholder. Do NOT wire controller calls or API calls until the user explicitly asks to connect the API.
 
 ## Phase 4: Pattern Selection
 

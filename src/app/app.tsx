@@ -14,7 +14,7 @@ enableScreens();
 enableFreeze();
 
 configure({
-  enforceActions: 'never',
+  enforceActions: 'always',
 });
 
 const firstStore = getStore();

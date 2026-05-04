@@ -40,7 +40,7 @@ Identify from screenshot or Figma summary:
 
 - **Bottom tab bar?** → use Bottom Tab pattern.
 - **Tabs inside screen?** → use Inner-Screen Tab pattern.
-- **Form inputs?** → use Formik + Zod pattern.
+- **Form inputs?** → use React Hook Form + Zod pattern.
 
 ## Phase 3: Implementation Patterns
 
@@ -64,15 +64,21 @@ Identify from screenshot or Figma summary:
 - `useState` in Container to toggle views.
 - Figma: map active/inactive variants to `activeTab` state.
 
-**Data Entry (Formik + Zod)** — always use `<Formik>` JSX component with render props **in the View file**. Never use `useFormik` hook. Never use plain `useState` for form fields.
+**Data Entry (React Hook Form + Zod)** — always use `useForm<IXxxFormModel>({ resolver: zodResolver(XxxSchema) })` **in the View file**. Never use plain `useState` for form fields. Never use Formik.
 
-- Zod schema, `validate` function, and `initialValues` all live at the top of the View file.
-- `validate` calls `schema.safeParse()` and maps `flatten().fieldErrors` to Formik's errors shape.
+- Zod schema lives in `src/common/form-schemas.ts` — never inline it in the View file:
+  ```ts
+  // src/common/form-schemas.ts
+  import { z } from 'zod';
+
+  export const LoginSchema = z.object({ ... });
+  ```
+- Import the schema in the View file and use `z.infer<typeof LoginSchema>` directly — no type alias needed. `useForm` call and `Controller` components live in the View body.
 - **Zod v4 format validators are top-level** — use `z.email()`, `z.url()`, `z.uuid()` directly, not `z.string().email()` / `z.string().url()` etc. (those are deprecated in v4). For length/regex constraints, `z.string().min()` / `.max()` / `.regex()` are still valid.
+- Use `Controller` from `react-hook-form` to wrap RN Paper inputs; expose errors via `formState.errors`.
 - Use `<HelperText type="error">` from RN Paper for inline validation messages.
-- Define the form data shape as an interface in `src/common/form-models.ts` and type `<Formik<IXxxFormModel>>`.
-- Container stays a plain Observer wrapper — no Formik logic in the container.
-- **UI first rule:** when the task is "create UI" or "create form", build the View with `<Formik>` and `onSubmit={() => {}}`. Do NOT wire controller calls, usecases, or API calls until the user explicitly asks to connect the API.
+- Container stays a plain Observer wrapper — no form logic in the container.
+- **UI first rule:** when the task is "create UI" or "create form", build the View with `handleSubmit(() => {})` as a no-op. Do NOT wire controller calls, usecases, or API calls until the user explicitly asks to connect the API.
 
 ## Phase 4: Output Requirements
 
@@ -81,6 +87,7 @@ In this order:
 1. Run `npx hygen screen new --module <module> --screen <name>` and `npx hygen component new --module <module> --component <name>` using the same `<name>` for both.
 2. Fill in the generated scaffold files — screen renders container, container wires store + passes props, view is pure UI.
 3. Styles via `StyleSheet.create` + `Colors` from `src/common/colors.ts`. No inline hex codes.
+
 
 ## UI Component Reference
 

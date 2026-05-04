@@ -19,7 +19,10 @@
       "Bash(node *)",
       "Bash(yarn component *)",
       "Bash(npx tsc *)",
-      "Bash(xargs wc *)"
+      "Bash(xargs wc *)",
+      "Bash(Remove-Item *)",
+      "Bash(Get-ChildItem -Path \"C:\\\\Projects\\\\templated-rn\" -Force)",
+      "Bash(Select-Object Name, FullName)"
     ]
   }
 }

@@ -10,4 +10,16 @@ export default class <%= h.changeCase.pascal(presenter) %>Presenter {
   constructor (store: IStore) {
     this.store = store
   }
+
+  isLoading (): boolean {
+    return false // this.store.<%= module %>.isLoading
+  }
+
+  isSuccess (): boolean {
+    return false // this.store.<%= module %>.isSuccess
+  }
+
+  errorMessage (): string | null {
+    return null // this.store.<%= module %>.error
+  }
 }
