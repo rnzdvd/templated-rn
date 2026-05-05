@@ -78,6 +78,9 @@
     "react-test-renderer": "19.2.3",
     "typescript": "^5.8.3"
   },
+  "bin": {
+    "templated-rn": "./init.js"
+  },
   "engines": {
     "node": ">= 22.11.0"
   }

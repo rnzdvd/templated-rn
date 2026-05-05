@@ -1,3 +1,8 @@
+#!/usr/bin/env node
+// Usage (from any new project root — works on Windows, macOS, Linux):
+//   npx github:rnzdvd/templated-rn
+// then: yarn setup
+
 const { spawnSync } = require('child_process');
 
 const REPO = 'rnzdvd/templated-rn';
