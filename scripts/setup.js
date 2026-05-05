@@ -85,7 +85,24 @@ rl.question('Enter choice [1]: ', (answer) => {
   const pkgPath = path.join(__dirname, '..', 'package.json');
   const pkg = JSON.parse(fs.readFileSync(pkgPath, 'utf8'));
   pkg.scripts = projectType === 'expo' ? EXPO_SCRIPTS : CLI_SCRIPTS;
+  if (projectType === 'expo') {
+    pkg.main = 'index.tsx';
+  } else {
+    delete pkg.main;
+  }
   fs.writeFileSync(pkgPath, JSON.stringify(pkg, null, 2) + '\n');
 
   console.log(`\npackage.json scripts updated for ${label}.`);
+
+  if (projectType === 'expo') {
+    const root = path.join(__dirname, '..');
+    const toDelete = ['app', 'components', 'hooks', 'scripts/reset-project.js'];
+    for (const rel of toDelete) {
+      const target = path.join(root, rel);
+      if (fs.existsSync(target)) {
+        fs.rmSync(target, { recursive: true, force: true });
+        console.log(`Deleted: ${rel}`);
+      }
+    }
+  }
 });
