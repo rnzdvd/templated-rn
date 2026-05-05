@@ -75,7 +75,7 @@ rl.question('Enter choice [1]: ', (answer) => {
   const root = path.join(__dirname, '..');
 
   if (projectType === 'cli') {
-    const toDelete = ['App.tsx', 'babel.config.js'];
+    const toDelete = ['App.tsx', 'babel.config.js', 'index.js'];
     for (const rel of toDelete) {
       const target = path.join(root, rel);
       if (fs.existsSync(target)) {
