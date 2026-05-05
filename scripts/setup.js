@@ -74,7 +74,7 @@ rl.question('Enter choice [1]: ', (answer) => {
 
   const result = spawnSync(
     'npx',
-    ['hygen', 'project', 'setup', '--projectType', projectType],
+    ['hygen', 'project', 'setup', '--projectType', projectType, '--force'],
     { stdio: 'inherit', shell: true },
   );
 
