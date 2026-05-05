@@ -1,5 +1,6 @@
 ---
 to: babel.config.js
+force: true
 ---
 module.exports = {
 <%_ if (projectType === 'expo') { _%>
