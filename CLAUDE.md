@@ -33,7 +33,7 @@ yarn container        # Creates container.tsx only
 yarn setup            # Regenerates all common infrastructure files via hygen
 
 # Bootstrap a new project (run from the new project root, works on Windows/macOS/Linux)
-npx github:rnzdvd/templated-rn   # pulls _templates/, .claude/skills/, scripts/ — then run yarn setup
+npx github:rnzdvd/create-templated-rn   # pulls _templates/, .claude/skills/, scripts/ — then run yarn setup
 ```
 
 > Node >= 22.11.0 required.

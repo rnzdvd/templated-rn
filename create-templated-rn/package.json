@@ -1,0 +1,17 @@
+{
+  "name": "create-templated-rn",
+  "version": "1.0.0",
+  "description": "Pull TemplatedRN tooling (_templates, .claude/skills, scripts) into any React Native project",
+  "bin": {
+    "create-templated-rn": "./index.js"
+  },
+  "engines": {
+    "node": ">= 22.11.0"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/rnzdvd/create-templated-rn"
+  },
+  "author": "rnzdvd",
+  "license": "MIT"
+}
