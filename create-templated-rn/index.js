@@ -27,4 +27,4 @@ for (const { src, dest } of folders) {
   }
 }
 
-console.log('\nDone! Run yarn setup to initialize the project.\n');
+console.log('\nDone! Run `node scripts/setup.js` to initialize the project.\n');
