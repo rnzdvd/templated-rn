@@ -1,16 +1,16 @@
 {
-  "name": "create-templated-rn",
+  "name": "react-native-scaffold",
   "version": "1.0.0",
   "description": "Pull TemplatedRN tooling (_templates, .claude/skills, scripts) into any React Native project",
   "bin": {
-    "create-templated-rn": "./index.js"
+    "react-native-scaffold": "./index.js"
   },
   "engines": {
     "node": ">= 22.11.0"
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/rnzdvd/create-templated-rn"
+    "url": "https://github.com/rnzdvd/react-native-scaffold"
   },
   "author": "rnzdvd",
   "license": "MIT"

@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 // Usage (from any new project root — works on Windows, macOS, Linux):
-//   npx github:rnzdvd/create-templated-rn
+//   npx github:rnzdvd/react-native-scaffold
 // then: yarn setup
 
 const { spawnSync } = require('child_process');
