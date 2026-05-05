@@ -1,8 +1,11 @@
+---
+to: CLAUDE.md
+---
 # CLAUDE.md
 
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
-> Project type: **React Native CLI**
+> Project type: **<%= projectType === 'expo' ? 'Expo' : 'React Native CLI' %>**
 
 ---
 
@@ -10,9 +13,15 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ```bash
 # Development
+<%_ if (projectType === 'expo') { _%>
+yarn start            # expo start
+yarn android          # expo run:android
+yarn ios              # expo run:ios
+<%_ } else { _%>
 yarn start            # react-native start
 yarn android          # react-native run-android
 yarn ios              # react-native run-ios
+<%_ } _%>
 
 # Quality
 yarn lint             # ESLint
@@ -31,9 +40,6 @@ yarn store            # Creates store.ts
 yarn entity           # Creates entity.ts
 yarn container        # Creates container.tsx only
 yarn setup            # Regenerates all common infrastructure files via hygen
-
-# Bootstrap a new project (run from the new project root)
-node init.js          # Pulls _templates/, .claude/skills/, scripts/ from rnzdvd/templated-rn then run yarn setup
 ```
 
 > Node >= 22.11.0 required.

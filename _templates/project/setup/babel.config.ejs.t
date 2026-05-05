@@ -2,6 +2,12 @@
 to: babel.config.js
 ---
 module.exports = {
+<%_ if (projectType === 'expo') { _%>
+  presets: ['babel-preset-expo'],
+  plugins: [
+    'react-native-reanimated/plugin', // ← MUST be last
+  ],
+<%_ } else { _%>
   presets: ['module:@react-native/babel-preset'],
   plugins: [
     ['module:react-native-dotenv', {
@@ -12,4 +18,5 @@ module.exports = {
     }],
     'react-native-reanimated/plugin', // ← MUST be last
   ],
+<%_ } _%>
 };
