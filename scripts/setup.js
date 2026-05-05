@@ -72,9 +72,22 @@ rl.question('Enter choice [1]: ', (answer) => {
   const { value: projectType, label } = CHOICES[index];
   console.log(`\nScaffolding for ${label}...\n`);
 
+  const root = path.join(__dirname, '..');
+
+  if (projectType === 'cli') {
+    const toDelete = ['App.tsx', 'babel.config.js'];
+    for (const rel of toDelete) {
+      const target = path.join(root, rel);
+      if (fs.existsSync(target)) {
+        fs.rmSync(target, { force: true });
+        console.log(`Deleted: ${rel}`);
+      }
+    }
+  }
+
   const result = spawnSync(
     'npx',
-    ['hygen', 'project', 'setup', '--projectType', projectType, '--force'],
+    ['hygen', 'project', 'setup', '--projectType', projectType],
     { stdio: 'inherit', shell: true },
   );
 
@@ -94,23 +107,12 @@ rl.question('Enter choice [1]: ', (answer) => {
 
   console.log(`\npackage.json scripts updated for ${label}.`);
 
-  const root = path.join(__dirname, '..');
-
   if (projectType === 'expo') {
     const toDelete = ['app', 'components', 'hooks', 'scripts/reset-project.js'];
     for (const rel of toDelete) {
       const target = path.join(root, rel);
       if (fs.existsSync(target)) {
         fs.rmSync(target, { recursive: true, force: true });
-        console.log(`Deleted: ${rel}`);
-      }
-    }
-  } else {
-    const toDelete = ['App.tsx', 'babel.config.js'];
-    for (const rel of toDelete) {
-      const target = path.join(root, rel);
-      if (fs.existsSync(target)) {
-        fs.rmSync(target, { force: true });
         console.log(`Deleted: ${rel}`);
       }
     }
