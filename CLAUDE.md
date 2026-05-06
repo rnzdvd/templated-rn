@@ -2,7 +2,19 @@
 
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
-> Project type: **React Native CLI**
+> Project type: **Expo**
+
+---
+
+## Package Manager
+
+Always use **yarn** to install packages — never `npm install`.
+
+```bash
+yarn add <package>           # add a dependency
+yarn add -D <package>        # add a dev dependency
+yarn remove <package>        # remove a package
+```
 
 ---
 
@@ -10,9 +22,9 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ```bash
 # Development
-yarn start            # react-native start
-yarn android          # react-native run-android
-yarn ios              # react-native run-ios
+yarn start            # expo start
+yarn android          # expo run:android
+yarn ios              # expo run:ios
 
 # Quality
 yarn lint             # ESLint
@@ -31,9 +43,6 @@ yarn store            # Creates store.ts
 yarn entity           # Creates entity.ts
 yarn container        # Creates container.tsx only
 yarn setup            # Regenerates all common infrastructure files via hygen
-
-# Bootstrap a new project (run from the new project root, works on Windows/macOS/Linux)
-npx github:rnzdvd/react-native-scaffold   # pulls _templates/, .claude/skills/, scripts/ — then run yarn setup
 ```
 
 > Node >= 22.11.0 required.
@@ -147,6 +156,26 @@ No layer skips another. Data flows down through calls and up through MobX observ
 3. Add the module's store instance to `getStore()` in `src/app/store.ts`
 
 **Store split rule** — one store per module by default. Split into a second store when either condition is true: (1) the store exceeds ~10 observables, or (2) two distinct feature domains exist in the same module (e.g. `auth` handling both login and user profile). Name split stores after the feature: `login.store.ts`, `profile.store.ts`.
+
+**Entity file split rule** — never put multiple entities in one file. Each entity gets its own file (e.g. `exercise.entity.ts`, `lesson.entity.ts`). All raw API interfaces (`IExercise`, `ILesson`, etc.) live in a single `interfaces.ts` alongside the entities — never inside an entity class file. Each entity class must extend `BaseApiMappedEntity`, call `makeAutoObservable(this)` in its constructor, declare typed public properties with default values, and implement `setFromApiModel()`.
+
+**UseCase store access rule** — use cases must never inject or access a store directly. If a use case needs to read data from a store (including another module's store), it must do so through a Repository method. Add a getter method to the relevant Repository (e.g. `getSelectedTopicId()`) and inject that Repository into the use case instead of the store.
+
+**Single IStore parameter rule** — controllers, presenters, and repositories must each accept exactly one parameter: the global `IStore` from `src/app/store.ts`. Never pass individual module stores (e.g. `HomeStore`, `LessonStore`) as separate constructor arguments. Internally, access the needed slice via `store.homeStore`, `store.lessonStore`, etc. Containers instantiate these classes with just `store` (from `useContext(StoreContext)`).
+
+**Controller-to-UseCase rule** — controllers must never call repository methods directly. Every store mutation, no matter how simple, must be routed through a use case: `Controller → UseCase → Repository → Store`. If no use case exists for an action, create one.
+
+**Controller getter rule** — controllers must never expose getter methods or return data. Controllers only orchestrate use cases (actions/mutations). All data reads for the UI belong in the Presenter.
+
+**Screen AppScreen rule** — every screen component must wrap its container with `AppScreen` from `src/common/ui/app.screen.tsx`. Never render a container directly as the screen root. Always pass `barStyle` and `statusBarBg` (from `Colors`) to `AppScreen`, and forward `navigation` and `route` into the container:
+
+```tsx
+const FooScreen: React.FC<IScreenContainer> = ({ navigation, route }) => (
+  <AppScreen barStyle="dark-content" statusBarBg={Colors.background}>
+    <FooContainer navigation={navigation} route={route} />
+  </AppScreen>
+);
+```
 
 **Storybook stories** live alongside components in `.rnstorybook/`; run `yarn storybook-generate` after adding new stories.
 

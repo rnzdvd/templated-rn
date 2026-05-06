@@ -39,12 +39,12 @@ npx hygen entity new --module <module> --entity <name>
 
 For each generated file, follow these project-specific logic rules:
 
-- **Entity:** Implement `setFromApiModel`. Map `snake_case` (API) to `camelCase` (Class).
+- **Entity:** One entity per file — never combine multiple entities in a single file. All raw API interfaces (e.g. `ILesson`, `IExercise`) go in a sibling `interfaces.ts`, never inside an entity file. Each entity class must extend `BaseApiMappedEntity`, call `makeAutoObservable(this)` in the constructor, declare typed public properties with default values, and implement `setFromApiModel()` mapping `snake_case` (API) → `camelCase` (class).
 - **Store:** Module-scoped (`<module>.store.ts`). Add feature-prefixed observables (e.g., `loginData`, `isLoading`, `error`). **Must** register in `src/app/store.ts` under the module key (e.g., `auth: new AuthStore()`). If the store already exists, add new observables to it — do not create a second store.
-- **Repository:** All mutations must be wrapped in `runInAction(() => { ... })` — never mutate store state outside `runInAction`. Create setter methods: `setX(data)`, `setIsLoading(bool)`, `setError(string)`, `clearError()`. It can create getter methods also to get data for use case classes.
-- **UseCase:** Wrap body in `try/catch`. On catch, call `this.repository.setError('Something went wrong')`. 1. Set `isLoading(true)`. 2. Call `gateway`. 3. Validate with `codeStatusChecker(response.status_code)` — **this is the only success check; never add `&& response.data.<field>`**. 4. If success: Map to Entity and call `repository.setX()`; set `repository.setIsSuccess(true)`; call `repository.clearError()`. 5. If fail: Call `repository.setError()`; set `repository.setIsSuccess(false)`. 6. Set `isLoading(false)`. **Never call `showToast` here** — toast notifications belong in the Container.
-- **Controller:** Instantiate the Repository, Gateway, and UseCase. Expose an `execute` method. Returns `void` — never return data; callers read state via the Presenter.
-- **Presenter:** Create read-only getters for store data.
+- **Repository:** Constructor accepts exactly one parameter: `store: IStore` (from `src/app/store.ts`) — never individual module stores. Access the module slice internally via `store.<moduleStore>.*`. All mutations must be wrapped in `runInAction(() => { ... })`. Create setter methods: `setX(data)`, `setIsLoading(bool)`, `setError(string)`, `clearError()`. Add getter methods (e.g. `getSelectedTopicId()`) when a UseCase needs to read data from this store — the UseCase must call the getter, never access the store directly.
+- **UseCase:** Never inject or access a store directly — all store reads must go through a Repository getter method (e.g. `onboardingRepository.getSelectedTopicId()`). Wrap body in `try/catch`. On catch, call `this.repository.setError('Something went wrong')`. 1. Set `isLoading(true)`. 2. Call `gateway`. 3. Validate with `codeStatusChecker(response.status_code)` — **this is the only success check; never add `&& response.data.<field>`**. 4. If success: Map to Entity and call `repository.setX()`; set `repository.setIsSuccess(true)`; call `repository.clearError()`. 5. If fail: Call `repository.setError()`; set `repository.setIsSuccess(false)`. 6. Set `isLoading(false)`. **Never call `showToast` here** — toast notifications belong in the Container.
+- **Controller:** Constructor accepts exactly one parameter: `store: IStore`. Instantiate Repository, Gateway, and UseCases internally. Expose action methods only — **never expose getters or return data**; all data reads belong in the Presenter. **Never call repository methods directly** — every action, including simple mutations, must go through a use case. If no use case exists for the action, create one.
+- **Presenter:** Constructor accepts exactly one parameter: `store: IStore`. Create read-only getters accessing `store.<moduleStore>.*`.
 
 ## 🔗 Phase 4: UI Wiring
 
@@ -96,6 +96,11 @@ interface ILoginViewModel {
 - [ ] UseCase never calls `showToast` — toast notifications go in the Container.
 - [ ] Controller methods return `void` — never return data from a controller.
 - [ ] Container reads outcome via `presenter.isSuccess()` / `presenter.getErrorMessage()` after awaiting the controller.
-- [ ] Ensure `makeObservable` is in the Entity constructor.
+- [ ] Each entity is in its own file; API interfaces live in `interfaces.ts`, not inside entity files.
+- [ ] Ensure `makeAutoObservable` is in the Entity constructor.
+- [ ] Repository, Controller, and Presenter each take exactly one constructor parameter: `store: IStore`.
+- [ ] UseCase never injects a store directly — reads go through Repository getter methods.
+- [ ] Controller never calls repository methods directly — every mutation routes through a use case.
+- [ ] Controller exposes no getters and returns no data — data reads belong in the Presenter.
 - [ ] Props callbacks use `on` prefix; internal handlers use `handle` prefix.
 - [ ] Navigation functions in Screens use `navigateTo<Destination>` prefix (e.g. `navigateToHome`, not `handleDeleteSuccess`).
