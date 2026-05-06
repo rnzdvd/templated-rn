@@ -108,7 +108,7 @@ rl.question('Enter choice [1]: ', (answer) => {
   console.log(`\npackage.json scripts updated for ${label}.`);
 
   if (projectType === 'expo') {
-    const toDelete = ['app', 'components', 'hooks', 'scripts/reset-project.js'];
+    const toDelete = ['app', 'components', 'hooks', 'constants', 'scripts/reset-project.js'];
     for (const rel of toDelete) {
       const target = path.join(root, rel);
       if (fs.existsSync(target)) {
