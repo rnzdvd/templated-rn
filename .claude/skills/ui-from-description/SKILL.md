@@ -58,7 +58,7 @@ Read the user's description and identify the layout pattern:
 
 ### Screen → Container → View (full screen)
 
-- **Screen** — renders `<AppScreen barStyle=... statusBarBg=...>` wrapping the Container. Receives `IScreenContainer` props. Register in `screen-registry.ts` and `navigator.tsx` after creation.
+- **Screen** — renders `<AppScreen barStyle=... statusBarBg=...>` wrapping the Container. Receives `IScreenContainer` props. **All navigation calls live here** — define `navigateTo<Destination>` functions and pass them as typed callback props to the container. Never pass the `navigation` object into a container. Register in `screen-registry.ts` and `navigator.tsx` after creation.
 - **Container** — plain `<Observer>` wrapper. No form logic. No store wiring until the user asks to connect the API. **Never access the store directly** — all state reads must go through the Presenter (e.g. `presenter.isLoading()`, never `store.auth.isLoading`).
 - **View** — pure UI. All data via its `IXxxViewModel` interface. No store access.
 

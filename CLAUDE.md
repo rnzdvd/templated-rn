@@ -167,14 +167,21 @@ No layer skips another. Data flows down through calls and up through MobX observ
 
 **Controller getter rule** — controllers must never expose getter methods or return data. Controllers only orchestrate use cases (actions/mutations). All data reads for the UI belong in the Presenter.
 
-**Screen AppScreen rule** — every screen component must wrap its container with `AppScreen` from `src/common/ui/app.screen.tsx`. Never render a container directly as the screen root. Always pass `barStyle` and `statusBarBg` (from `Colors`) to `AppScreen`, and forward `navigation` and `route` into the container:
+**Screen AppScreen rule** — every screen component must wrap its container with `AppScreen` from `src/common/ui/app.screen.tsx`. Never render a container directly as the screen root. Always pass `barStyle` and `statusBarBg` (from `Colors`) to `AppScreen`.
+
+**Screen navigation rule** — all `navigation.navigate`, `navigation.replace`, and `navigation.goBack` calls must live in the screen component. Define `navigateTo<Destination>` functions in the screen and pass them as callbacks to the container. Containers must never import or call `navigation` directly — they receive typed callback props instead.
 
 ```tsx
-const FooScreen: React.FC<IScreenContainer> = ({ navigation, route }) => (
-  <AppScreen barStyle="dark-content" statusBarBg={Colors.background}>
-    <FooContainer navigation={navigation} route={route} />
-  </AppScreen>
-);
+const FooScreen: React.FC<IScreenContainer> = ({ navigation }) => {
+  const navigateToBar = () => navigation.navigate(ScreenNames.BarScreen);
+  const navigateBack = () => navigation.goBack();
+
+  return (
+    <AppScreen barStyle="dark-content" statusBarBg={Colors.background}>
+      <FooContainer onNavigateToBar={navigateToBar} onBack={navigateBack} />
+    </AppScreen>
+  );
+};
 ```
 
 **Storybook stories** live alongside components in `.rnstorybook/`; run `yarn storybook-generate` after adding new stories.

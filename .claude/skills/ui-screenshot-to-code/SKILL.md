@@ -46,13 +46,19 @@ Identify from screenshot or Figma summary:
 
 **Screen → Container → View rule (always enforced):**
 
-- Screen renders `<AppScreen barStyle=... statusBarBg={Colors.background}>` wrapping the Container. Never render the Container directly as the screen root. Always import `AppScreen` from `src/common/ui/app.screen.tsx` and `Colors` from `src/common/colors.ts`. Forward `navigation` and `route` into the Container:
+- Screen renders `<AppScreen barStyle=... statusBarBg={Colors.background}>` wrapping the Container. Never render the Container directly as the screen root. Always import `AppScreen` from `src/common/ui/app.screen.tsx` and `Colors` from `src/common/colors.ts`.
+- **All navigation calls belong in the screen.** Define `navigateTo<Destination>` functions in the screen and pass them as typed callback props to the container. Containers must never hold a `navigation` prop or call `navigation.*` directly.
   ```tsx
-  const FooScreen: React.FC<IScreenContainer> = ({ navigation, route }) => (
-    <AppScreen barStyle="dark-content" statusBarBg={Colors.background}>
-      <FooContainer navigation={navigation} route={route} />
-    </AppScreen>
-  );
+  const FooScreen: React.FC<IScreenContainer> = ({ navigation }) => {
+    const navigateToBar = () => navigation.navigate(ScreenNames.BarScreen);
+    const navigateBack = () => navigation.goBack();
+
+    return (
+      <AppScreen barStyle="dark-content" statusBarBg={Colors.background}>
+        <FooContainer onNavigateToBar={navigateToBar} onBack={navigateBack} />
+      </AppScreen>
+    );
+  };
   ```
 - Container is the `Observer` wrapper — owns store wiring and passes typed props to View. **Never access the store directly in a Container** — all state reads must go through the Presenter (e.g. `presenter.isLoading()`, never `store.module.isLoading`). If a Presenter method is missing, add it to the Presenter first.
 - Handler functions that do **not** read observables must be defined **outside** the `Observer` render callback — at module level or above the component return — so they are not recreated on every render.
