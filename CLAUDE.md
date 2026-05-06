@@ -167,6 +167,10 @@ No layer skips another. Data flows down through calls and up through MobX observ
 
 **Controller getter rule** — controllers must never expose getter methods or return data. Controllers only orchestrate use cases (actions/mutations). All data reads for the UI belong in the Presenter.
 
+**UseCase execute void rule** — `execute()` must always return `void`. Use cases must never return data to their caller. If the result of an execution needs to be observed (e.g. success/failure, completion status), write it to the store via the Repository and expose it through the Presenter.
+
+**UseCase injection rule** — never pass a use case as a constructor argument to another use case. Use case execution always happens in the controller. If two use cases must run in sequence, the controller calls them one after the other; each case guards itself via store state (e.g. `getIsComplete()`) to determine whether it should run.
+
 **Screen AppScreen rule** — every screen component must wrap its container with `AppScreen` from `src/common/ui/app.screen.tsx`. Never render a container directly as the screen root. Always pass `barStyle` and `statusBarBg` (from `Colors`) to `AppScreen`.
 
 **Screen navigation rule** — all `navigation.navigate`, `navigation.replace`, and `navigation.goBack` calls must live in the screen component. Define `navigateTo<Destination>` functions in the screen and pass them as callbacks to the container. Containers must never import or call `navigation` directly — they receive typed callback props instead.
