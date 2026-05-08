@@ -18,6 +18,28 @@ yarn remove <package>        # remove a package
 
 ---
 
+## Code Generation — MANDATORY
+
+**Always use hygen generators to create feature files. Never write them manually, even if not explicitly told to.**
+
+This applies to every new screen, component, use case, controller, presenter, gateway, repository, store, or entity — without exception. If a generator exists for the file type, use it.
+
+```bash
+yarn component        # Creates container.tsx + view.tsx
+yarn screen           # Creates screen.tsx
+yarn case             # Creates usecase.ts + test.ts
+yarn controller       # Creates controller.ts
+yarn presenter        # Creates presenter.ts
+yarn gateway          # Creates <module>.gateway.ts (per-module API gateway)
+yarn repo             # Creates repository.ts
+yarn store            # Creates store.ts
+yarn entity           # Creates entity.ts
+yarn container        # Creates container.tsx only
+yarn setup            # Regenerates all common infrastructure files via hygen
+```
+
+---
+
 ## Commands
 
 ```bash
@@ -30,19 +52,6 @@ yarn ios              # expo run:ios
 yarn lint             # ESLint
 yarn test             # Jest (all tests)
 yarn test --testPathPattern=<path>  # Run a single test file
-
-# Code generation (always use these — never write feature files manually)
-yarn component        # Creates container.tsx + view.tsx
-yarn screen           # Creates screen.tsx
-yarn case             # Creates usecase.ts + test.ts
-yarn controller       # Creates controller.ts
-yarn presenter        # Creates presenter.ts
-yarn gateway          # Creates <module>.gateway.ts (per-module API gateway)
-yarn repo             # Creates repository.ts
-yarn store            # Creates store.ts
-yarn entity           # Creates entity.ts
-yarn container        # Creates container.tsx only
-yarn setup            # Regenerates all common infrastructure files via hygen
 ```
 
 > Node >= 22.11.0 required.
