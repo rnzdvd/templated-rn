@@ -18,28 +18,6 @@ yarn remove <package>        # remove a package
 
 ---
 
-## Code Generation — MANDATORY
-
-**Always use hygen generators to create feature files. Never write them manually, even if not explicitly told to.**
-
-This applies to every new screen, component, use case, controller, presenter, gateway, repository, store, or entity — without exception. If a generator exists for the file type, use it.
-
-```bash
-yarn component        # Creates container.tsx + view.tsx
-yarn screen           # Creates screen.tsx
-yarn case             # Creates usecase.ts + test.ts
-yarn controller       # Creates controller.ts
-yarn presenter        # Creates presenter.ts
-yarn gateway          # Creates <module>.gateway.ts (per-module API gateway)
-yarn repo             # Creates repository.ts
-yarn store            # Creates store.ts
-yarn entity           # Creates entity.ts
-yarn container        # Creates container.tsx only
-yarn setup            # Regenerates all common infrastructure files via hygen
-```
-
----
-
 ## Commands
 
 ```bash
@@ -52,6 +30,19 @@ yarn ios              # expo run:ios
 yarn lint             # ESLint
 yarn test             # Jest (all tests)
 yarn test --testPathPattern=<path>  # Run a single test file
+
+# Code generation (always use these — never write feature files manually)
+yarn component        # Creates container.tsx + view.tsx
+yarn screen           # Creates screen.tsx
+yarn case             # Creates usecase.ts + test.ts
+yarn controller       # Creates controller.ts
+yarn presenter        # Creates presenter.ts
+yarn gateway          # Creates <module>.gateway.ts (per-module API gateway)
+yarn repo             # Creates repository.ts
+yarn store            # Creates store.ts
+yarn entity           # Creates entity.ts
+yarn container        # Creates container.tsx only
+yarn setup            # Regenerates all common infrastructure files via hygen
 ```
 
 > Node >= 22.11.0 required.
@@ -152,6 +143,8 @@ No layer skips another. Data flows down through calls and up through MobX observ
 ---
 
 ## Key Conventions
+
+**File creation rule** — always use the hygen generators listed in the Commands section (`yarn component`, `yarn screen`, `yarn case`, `yarn controller`, `yarn presenter`, `yarn gateway`, `yarn repo`, `yarn store`, `yarn entity`, `yarn container`) to scaffold any new feature file. Never hand-write a container, view, screen, use case, controller, presenter, gateway, repository, store, or entity file from scratch — run the generator first, then edit the generated output. This keeps boilerplate, imports, and naming consistent across modules.
 
 **API responses** are always shaped as `{ status_code: number; data: T }`. The interceptor in `api.ts` normalises both success and error responses into this envelope — use `codeStatusChecker` from `api-utils.ts` to interpret the status code.
 
