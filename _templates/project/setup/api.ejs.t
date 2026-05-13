@@ -3,7 +3,7 @@ to: src/common/api/api.ts
 ---
 
 import { ApiResponse, ApisauceInstance, create } from 'apisauce';
-import { AxiosRequestConfig, AxiosResponse } from 'axios';
+import { AxiosRequestConfig, AxiosResponse, AxiosError } from 'axios';
 import { IStore } from '../../app/store';
 import { ApiConfig, DEFAULT_API_CONFIG } from './api-config';
 
@@ -40,10 +40,15 @@ export class Api implements IApi {
 
         return response;
       },
-      function (error) {
+      function (error: AxiosError) {
+        const isTimeout =
+          error.code === 'ECONNABORTED' ||
+          error.code === 'ETIMEDOUT' ||
+          error.message?.toLowerCase().includes('timeout');
+
         return {
           data: {
-            status_code: error.response?.status ?? 500,
+            status_code: error.response?.status ?? (isTimeout ? 408 : 500),
             data: error.response?.data ?? {},
           },
         };
