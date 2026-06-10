@@ -120,7 +120,7 @@ Always use `useForm<IXxxFormModel>` with `resolver: zodResolver(XxxSchema)` **in
   });
   ```
 - **Zod v4 format validators are top-level** — use `z.email()`, `z.url()`, `z.uuid()` directly, not `z.string().email()` / `z.string().url()` etc. (those are deprecated in v4). For string length/regex constraints, `z.string().min()` / `.max()` / `.regex()` are still valid.
-- Use `Controller` from `react-hook-form` to wrap RN Paper inputs:
+- Use `Controller` from `react-hook-form` to wrap `AppTextInput` (from `src/common/ui/text-input.view.tsx`):
   ```tsx
   const { control, handleSubmit, formState: { errors } } = useForm<ILoginFormModel>({
     resolver: zodResolver(LoginSchema),
@@ -130,18 +130,17 @@ Always use `useForm<IXxxFormModel>` with `resolver: zodResolver(XxxSchema)` **in
     control={control}
     name="email"
     render={({ field: { onChange, onBlur, value } }) => (
-      <TextInput
+      <AppTextInput
         label="Email"
-        mode="outlined"
         onBlur={onBlur}
         onChangeText={onChange}
         value={value}
+        error={errors.email?.message}
       />
     )}
   />
-  <HelperText type="error">{errors.email?.message}</HelperText>
   ```
-- Use `<HelperText type="error">` from RN Paper for inline validation messages.
+- Inline validation messages come from `AppTextInput`'s `error` prop — pass `errors.<field>?.message`; no separate helper-text component.
 - Container stays a plain Observer wrapper — no form logic in the container.
 - **UI first rule:** `onSubmit={() => {}}` is always a no-op placeholder. Do NOT wire controller calls, usecases, or API calls until the user explicitly asks to connect the API.
 
@@ -150,36 +149,37 @@ Always use `useForm<IXxxFormModel>` with `resolver: zodResolver(XxxSchema)` **in
 **Standard Modal:**
 
 - Dialog → `animationType="fade"`
-- Bottom Sheet → `animationType="slide"` + `TouchableOpacity` backdrop
-- Style: `borderRadius: 16`, `padding: 24`
+- Bottom Sheet → RN `Modal` with `animationType="slide"` + `Pressable` backdrop
+- Style: `rounded-2xl p-6` via `className`
 
-**Material Dialog (RN Paper):**
+**Dialog:**
 
-- Use `<Dialog>` wrapped in `<Portal>`.
-- Structure: `Dialog.Title` + `Dialog.Content` + `Dialog.Actions`
+- Use `AppDialog` from `src/common/ui/dialog.view.tsx` — RN `Modal` based, no Portal needed.
+- Pass `title`, content as `children`, and `actions` as a row of `AppButton`s.
+- The parent Container owns `visible` / `onDismiss`.
 
 **Inline Tabs / Toggles:**
 
-- Use `<SegmentedButtons>` from RN Paper.
+- Compose a row of `Pressable`s styled with `className` (e.g. `flex-row bg-black/5 rounded-lg p-1`, selected segment `bg-white`).
 - Manage `activeTab` in the Container.
 
 ## Phase 5: Rules
 
 - **Presenter-only store access** — Containers must never read from the store directly. Always use the Presenter (e.g. `presenter.isLoading()`, not `store.module.isLoading`). If a Presenter method is missing, add it to the Presenter first.
-- **Styles** — `StyleSheet.create()` + `Colors` from `src/common/colors.ts`. No inline hex codes.
+- **Styles** — NativeWind `className` with semantic color classes (`bg-primary`, `text-primary`) defined in `tailwind.config.js` (palette lives in `src/common/palette.js`, exposed to TS as `Colors` via `src/common/colors.ts`). No `StyleSheet.create()` in new views. No arbitrary hex in classNames (`bg-[#007AFF]` is forbidden — add the color to the palette instead). `Colors` is still used for non-className props (`statusBarBg`, navigation theme).
 - **Assets** — import from `assets/` via `require()`. Never store in `src/`.
 - **New screen** — after creating, register the screen name in `src/app/screen-registry.ts` and add the `Stack.Screen` entry to `src/app/navigator.tsx`.
 
 ## UI Component Reference
 
-| Visual Element   | Paper Component                           |
-| :--------------- | :---------------------------------------- |
-| Headings         | `<Text variant="headlineMedium">`         |
-| Body text        | `<Text variant="bodyMedium">`             |
-| Contained button | `<Button mode="contained">`               |
-| Outlined button  | `<Button mode="outlined">`                |
-| Text inputs      | `<TextInput label="..." mode="outlined">` |
-| Inline error     | `<HelperText type="error">`               |
-| Screen wrapper   | `<AppScreen>`                             |
-| Tab toggle       | `<SegmentedButtons>`                      |
-| Dialog           | `<Dialog>` inside `<Portal>`              |
+| Visual Element   | Component                                                            |
+| :--------------- | :------------------------------------------------------------------- |
+| Headings         | RN `<Text className="text-2xl font-bold">`                            |
+| Body text        | RN `<Text className="text-base">`                                     |
+| Contained button | `<AppButton variant="contained">` (`src/common/ui/button.view.tsx`)   |
+| Outlined button  | `<AppButton variant="outlined">`                                      |
+| Text inputs      | `<AppTextInput label="...">` (`src/common/ui/text-input.view.tsx`)    |
+| Inline error     | `error` prop on `<AppTextInput>`                                      |
+| Screen wrapper   | `<AppScreen>`                                                         |
+| Tab toggle       | Row of `Pressable`s styled with `className`                           |
+| Dialog           | `<AppDialog>` (`src/common/ui/dialog.view.tsx`) — no Portal needed    |

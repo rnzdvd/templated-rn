@@ -1,5 +1,3 @@
-export const Colors = {
-  white: '#fff',
-  black: '#000',
-  transparent: 'transparent',
-};
+import palette from './palette';
+
+export const Colors = palette;

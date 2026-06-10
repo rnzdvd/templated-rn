@@ -2,7 +2,7 @@
 
   A React Native project template enforcing strict Clean Architecture across all feature modules.
 
-  **Stack:** TypeScript · MobX · React Navigation · apisauce · React Native Paper · React Hook Form + Zod · hygen
+  **Stack:** TypeScript · MobX · React Navigation · apisauce · NativeWind (Tailwind CSS) · React Hook Form + Zod · hygen
 
   ---
 

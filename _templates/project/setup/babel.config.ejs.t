@@ -3,12 +3,15 @@ to: babel.config.js
 ---
 module.exports = {
 <%_ if (projectType === 'expo') { _%>
-  presets: ['babel-preset-expo'],
+  presets: [
+    ['babel-preset-expo', { jsxImportSource: 'nativewind' }],
+    'nativewind/babel',
+  ],
   plugins: [
     'react-native-reanimated/plugin', // ← MUST be last
   ],
 <%_ } else { _%>
-  presets: ['module:@react-native/babel-preset'],
+  presets: ['module:@react-native/babel-preset', 'nativewind/babel'],
   plugins: [
     ['module:react-native-dotenv', {
       moduleName: '@env',

@@ -88,8 +88,7 @@ Identify from screenshot or Figma summary:
   ```
 - Import the schema in the View file and use `z.infer<typeof LoginSchema>` directly — no type alias needed. `useForm` call and `Controller` components live in the View body.
 - **Zod v4 format validators are top-level** — use `z.email()`, `z.url()`, `z.uuid()` directly, not `z.string().email()` / `z.string().url()` etc. (those are deprecated in v4). For length/regex constraints, `z.string().min()` / `.max()` / `.regex()` are still valid.
-- Use `Controller` from `react-hook-form` to wrap RN Paper inputs; expose errors via `formState.errors`.
-- Use `<HelperText type="error">` from RN Paper for inline validation messages.
+- Use `Controller` from `react-hook-form` to wrap `AppTextInput` (from `src/common/ui/text-input.view.tsx`); pass `errors.<field>?.message` from `formState.errors` to its `error` prop for inline validation.
 - Container stays a plain Observer wrapper — no form logic in the container.
 - **UI first rule:** when the task is "create UI" or "create form", build the View with `handleSubmit(() => {})` as a no-op. Do NOT wire controller calls, usecases, or API calls until the user explicitly asks to connect the API.
 
@@ -99,14 +98,17 @@ In this order:
 
 1. Run `npx hygen screen new --module <module> --screen <name>` and `npx hygen component new --module <module> --component <name>` using the same `<name>` for both.
 2. Fill in the generated scaffold files — screen renders container, container wires store + passes props, view is pure UI.
-3. Styles via `StyleSheet.create` + `Colors` from `src/common/colors.ts`. No inline hex codes.
+3. Styles via NativeWind `className` with semantic color classes (`bg-primary`, `text-primary`) from `tailwind.config.js` (palette in `src/common/palette.js`, exposed as `Colors` via `src/common/colors.ts` for non-className props like `statusBarBg`). No `StyleSheet.create()` in new views. No arbitrary hex in classNames (`bg-[#007AFF]` is forbidden — add the color to the palette instead).
 
 
 ## UI Component Reference
 
-| Visual Element | Paper Component                   |
-| :------------- | :-------------------------------- |
-| Headings       | `<Text variant="headlineMedium">` |
-| Buttons        | `<Button mode="contained">`       |
-| Inputs         | `<TextInput label="...">`         |
-| Screen wrapper | `AppScreen`                       |
+| Visual Element | Component                                                           |
+| :------------- | :------------------------------------------------------------------ |
+| Headings       | RN `<Text className="text-2xl font-bold">`                           |
+| Body text      | RN `<Text className="text-base">`                                    |
+| Buttons        | `<AppButton variant="contained">` (`src/common/ui/button.view.tsx`)  |
+| Inputs         | `<AppTextInput label="..." error={...}>` (`src/common/ui/text-input.view.tsx`) |
+| Tab toggle     | Row of `Pressable`s styled with `className`                          |
+| Dialog         | `<AppDialog>` (`src/common/ui/dialog.view.tsx`)                      |
+| Screen wrapper | `AppScreen`                                                          |

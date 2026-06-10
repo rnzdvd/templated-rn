@@ -22,7 +22,7 @@ Use the Figma MCP tool to fetch the target frame or component. Extract:
 | Item spacing (gap)                         | `gap: N`                                                                    |
 | Padding                                    | `padding` / `paddingHorizontal` / `paddingVertical`                         |
 | Corner radius                              | `borderRadius: N`                                                           |
-| Fill color                                 | Map to `Colors` from `src/common/colors.ts`                                 |
+| Fill color                                 | Map to a palette key from `src/common/palette.js` (used as `bg-<key>` / `text-<key>` classes) |
 | Stroke                                     | `borderWidth` + `borderColor`                                               |
 | Opacity                                    | `opacity: N`                                                                |
 | Drop shadow                                | `shadowColor`, `shadowOffset`, `shadowOpacity`, `shadowRadius`, `elevation` |
@@ -38,8 +38,8 @@ Use the Figma MCP tool to fetch the target frame or component. Extract:
 
 ## Phase 3: Color Matching
 
-- Match every extracted fill to the nearest value in `src/common/colors.ts`.
-- If no match exists → **flag it to the user** and ask before proceeding. Never use raw hex codes.
+- Match every extracted fill to the nearest value in `src/common/palette.js` (exposed to TS as `Colors` via `src/common/colors.ts`; consumed in views as NativeWind classes like `bg-primary`).
+- If no match exists → **flag it to the user** and ask before proceeding. Never use raw hex codes — add new colors to the palette instead.
 
 ## Phase 4: Output a Design Summary
 

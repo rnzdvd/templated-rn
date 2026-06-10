@@ -45,8 +45,7 @@ Never use `yarn screen` or interactive `yarn component` prompts for this skill. 
   ```
 - Import the schema in the View file and use `z.infer<typeof LoginSchema>` directly — no type alias needed. `useForm` call and `Controller` components live in the View body.
 - **Zod v4 format validators are top-level** — use `z.email()`, `z.url()`, `z.uuid()` directly, not `z.string().email()` / `z.string().url()` etc. (those are deprecated in v4). For length/regex constraints, `z.string().min()` / `.max()` / `.regex()` are still valid.
-- Use `Controller` from `react-hook-form` to wrap RN Paper inputs; expose errors via `formState.errors`.
-- Use `<HelperText type="error">` from RN Paper for inline validation messages.
+- Use `Controller` from `react-hook-form` to wrap `AppTextInput` (from `src/common/ui/text-input.view.tsx`); pass `errors.<field>?.message` from `formState.errors` to its `error` prop for inline validation.
 - Container stays a plain Observer wrapper — no form logic in the container.
 - **UI first rule:** set `handleSubmit(() => {})` as a no-op placeholder. Do NOT wire controller calls or API calls until the user explicitly asks to connect the API.
 
@@ -55,14 +54,15 @@ Never use `yarn screen` or interactive `yarn component` prompts for this skill. 
 **Standard Modal / Bottom Sheet** — use RN `Modal`.
 
 - Dialog → `animationType="fade"`
-- Bottom Sheet → `animationType="slide"` + `TouchableOpacity` backdrop
-- Style: `borderRadius: 16`, `padding: 24`
+- Bottom Sheet → `animationType="slide"` + `Pressable` backdrop
+- Style: `rounded-2xl p-6` via `className`
 
-**Material Dialog (RN Paper)** — use `<Dialog>` wrapped in `<Portal>`.
+**Dialog** — use `AppDialog` from `src/common/ui/dialog.view.tsx` (RN `Modal` based — no Portal needed).
 
-- Structure: `Dialog.Title` + `Dialog.Content` + `Dialog.Actions`
+- Pass `title`, content as `children`, and `actions` as a row of `AppButton`s.
+- Parent Container owns `visible` / `onDismiss`.
 
-**Inline UI (Tabs/Toggles)** — use `SegmentedButtons` from RN Paper.
+**Inline UI (Tabs/Toggles)** — compose a row of `Pressable`s styled with `className` (e.g. `flex-row bg-black/5 rounded-lg p-1`, selected segment `bg-white`).
 
 - Manage `activeTab` state in the parent Container.
 
@@ -71,12 +71,12 @@ Never use `yarn screen` or interactive `yarn component` prompts for this skill. 
 - **Presenter-only store access** — Containers must never read from the store directly. Always use the Presenter. If a getter is missing, add it to the Presenter file before wiring the Container.
 - **View** — no store access; data via typed ViewModel interface only.
 - **Assets** — import from `assets/` via `require()`. Never store in `src/`.
-- **Styles** — `StyleSheet.create()` + `Colors` from `src/common/colors.ts`. No hex codes.
+- **Styles** — NativeWind `className` with semantic color classes (`bg-primary`, `text-primary`) from `tailwind.config.js` (palette in `src/common/palette.js`, exposed as `Colors` via `src/common/colors.ts` for non-className props). No `StyleSheet.create()` in new views. No arbitrary hex in classNames (`bg-[#007AFF]` is forbidden — add the color to the palette instead).
 - **State** — parent Container controls `visible` prop.
 
 ## Output Checklist
 
 - [ ] `yarn component` command provided first.
 - [ ] Container has `visible` and `onDismiss` props.
-- [ ] View uses `StyleSheet` and `Colors` only.
+- [ ] View uses NativeWind `className` with semantic color classes only — no `StyleSheet`, no arbitrary hex.
 - [ ] Parent screen usage snippet included.

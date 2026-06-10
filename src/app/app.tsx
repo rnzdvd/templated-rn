@@ -1,9 +1,8 @@
+import '../../global.css';
 import { configure } from 'mobx';
 import React from 'react';
 import { StyleSheet } from 'react-native';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
-import { DefaultTheme, PaperProvider } from 'react-native-paper';
-import { ThemeProp } from 'react-native-paper/lib/typescript/types';
 import { enableFreeze, enableScreens } from 'react-native-screens';
 import Toast from 'react-native-toast-message';
 import StorybookUI from '../../.rnstorybook';
@@ -19,25 +18,14 @@ configure({
 
 const firstStore = getStore();
 
-const theme: ThemeProp = {
-  ...DefaultTheme,
-  colors: {
-    ...DefaultTheme.colors,
-    primary: '#007AFF',
-    secondary: '#007AFF',
-  },
-};
-
 const App: React.FC = () => {
   return SHOW_STORYBOOK && __DEV__ ? (
     <StorybookUI />
   ) : (
     <StoreContext.Provider value={firstStore}>
       <GestureHandlerRootView style={styles.container}>
-        <PaperProvider theme={theme}>
-          <Navigator />
-          <Toast />
-        </PaperProvider>
+        <Navigator />
+        <Toast />
       </GestureHandlerRootView>
     </StoreContext.Provider>
   );

@@ -2,7 +2,7 @@
 
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
-> Project type: **Expo**
+> Project type: **React Native CLI**
 
 ---
 
@@ -22,9 +22,9 @@ yarn remove <package>        # remove a package
 
 ```bash
 # Development
-yarn start            # expo start
-yarn android          # expo run:android
-yarn ios              # expo run:ios
+yarn start            # react-native start
+yarn android          # react-native run-android
+yarn ios              # react-native run-ios
 
 # Quality
 yarn lint             # ESLint
@@ -53,7 +53,7 @@ yarn setup            # Regenerates all common infrastructure files via hygen
 
 This is a React Native project enforcing **Clean Architecture** across all feature modules.
 
-Every feature follows a strict layered structure: UI → Controller → UseCase → Gateway → Repository → Store → Presenter → UI. State is managed globally via **MobX**. HTTP calls go through **apisauce**. Navigation uses **React Navigation (native-stack)**. UI components use **React Native Paper**. Forms use **React Hook Form + Zod**.
+Every feature follows a strict layered structure: UI → Controller → UseCase → Gateway → Repository → Store → Presenter → UI. State is managed globally via **MobX**. HTTP calls go through **apisauce**. Navigation uses **React Navigation (native-stack)**. UI uses **React Native built-in components styled with NativeWind (Tailwind CSS)**, plus shared primitives in `src/common/ui/` (AppButton, AppTextInput, AppDialog). Forms use **React Hook Form + Zod**.
 
 ---
 
@@ -65,7 +65,7 @@ Every feature follows a strict layered structure: UI → Controller → UseCase 
 | State          | MobX + mobx-react-lite               |
 | Navigation     | React Navigation (native-stack)      |
 | HTTP           | apisauce (axios wrapper)             |
-| UI Components  | React Native Paper                   |
+| Styling / UI   | NativeWind v4 (Tailwind CSS) + RN built-ins |
 | Forms          | React Hook Form + Zod                |
 | Animations     | react-native-reanimated              |
 | Gestures       | react-native-gesture-handler         |
@@ -83,7 +83,7 @@ Every feature follows a strict layered structure: UI → Controller → UseCase 
 ```
 src/
 ├── app/
-│   ├── app.tsx             # Root: StoreContext.Provider → GestureHandlerRootView → PaperProvider → Navigator
+│   ├── app.tsx             # Root: imports global.css; StoreContext.Provider → GestureHandlerRootView → Navigator
 │   ├── navigator.tsx       # NavigationContainer; register stacks here
 │   ├── screen-registry.ts  # ScreenNames constants object (add new screen names here)
 │   └── store.ts            # getStore() — add module stores here; IStore type is its return type
@@ -99,8 +99,12 @@ src/
 │   ├── ui/
 │   │   ├── app.screen.tsx        # AppScreen wrapper (IScreenContainer, IAppScreen props)
 │   │   ├── container.view.tsx    # SafeArea + KeyboardAvoid root container
-│   │   └── custom-status-bar.view.tsx
-│   ├── colors.ts           # All color constants
+│   │   ├── custom-status-bar.view.tsx
+│   │   ├── button.view.tsx           # AppButton (contained/outlined/text, loading, disabled)
+│   │   ├── text-input.view.tsx       # AppTextInput (label + inline error; Controller-friendly)
+│   │   └── dialog.view.tsx           # AppDialog (RN Modal-based; title/children/actions)
+│   ├── palette.js          # CJS color palette — single source of truth (consumed by tailwind.config.js)
+│   ├── colors.ts           # Re-exports palette as Colors for non-className props (StatusBar, nav)
 │   ├── config.ts           # BASE_URL, SHOW_STORYBOOK flag
 │   ├── form-schemas.ts     # Zod schemas + inferred types (e.g. LoginSchema, ILoginFormModel)
 │   └── utils.ts            # Shared utilities
@@ -189,6 +193,8 @@ const FooScreen: React.FC<IScreenContainer> = ({ navigation }) => {
   );
 };
 ```
+
+**NativeWind styling rule** — feature views are styled exclusively with NativeWind `className` and semantic color utilities (`bg-primary`, `text-primary`). The palette lives in `src/common/palette.js` (consumed by `tailwind.config.js` and re-exported as `Colors` from `src/common/colors.ts` for non-className props like `statusBarBg` and navigation themes). Never use `StyleSheet.create()` in new views; never use arbitrary hex values in classNames (`bg-[#007AFF]` is forbidden — add the color to `palette.js` instead). Prefer the shared primitives (`AppButton`, `AppTextInput`, `AppDialog` in `src/common/ui/`) over hand-rolled buttons/inputs/dialogs.
 
 **Storybook stories** live alongside components in `.rnstorybook/`; run `yarn storybook-generate` after adding new stories.
 
