@@ -6,18 +6,6 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ---
 
-## Package Manager
-
-Always use **yarn** to install packages — never `npm install`.
-
-```bash
-yarn add <package>           # add a dependency
-yarn add -D <package>        # add a dev dependency
-yarn remove <package>        # remove a package
-```
-
----
-
 ## Commands
 
 ```bash
@@ -148,11 +136,11 @@ No layer skips another. Data flows down through calls and up through MobX observ
 
 ## Key Conventions
 
-**File creation rule** — always use the hygen generators listed in the Commands section (`yarn component`, `yarn screen`, `yarn case`, `yarn controller`, `yarn presenter`, `yarn gateway`, `yarn repo`, `yarn store`, `yarn entity`, `yarn container`) to scaffold any new feature file. Never hand-write a container, view, screen, use case, controller, presenter, gateway, repository, store, or entity file from scratch — run the generator first, then edit the generated output. This keeps boilerplate, imports, and naming consistent across modules.
-
 **API responses** are always shaped as `{ status_code: number; data: T }`. The interceptor in `api.ts` normalises both success and error responses into this envelope — use `codeStatusChecker` from `api-utils.ts` to interpret the status code.
 
 **MobX** is configured with `enforceActions: 'always'` (see `app.tsx`). All store mutations must go through the Repository layer and be wrapped in `runInAction(() => { ... })`. Never mutate store state outside a Repository.
+
+**One controller, one presenter per Container** — a Container instantiates exactly one Controller and one Presenter, each once. Never declare a second controller or presenter in the same Container. If a Container needs more actions or data, add methods to the existing Controller/Presenter (or to the module's store) instead of instantiating another one. If a Container's UI genuinely spans two unrelated feature domains, that's a signal to split it into two Containers, not to double up controllers/presenters in one.
 
 **Storybook** is toggled by `SHOW_STORYBOOK` in `src/common/config.ts`. When `true` in `__DEV__`, the app renders `StorybookUI` instead of Navigator. Set to `false` to run the normal app.
 
@@ -162,37 +150,6 @@ No layer skips another. Data flows down through calls and up through MobX observ
 3. Add the module's store instance to `getStore()` in `src/app/store.ts`
 
 **Store split rule** — one store per module by default. Split into a second store when either condition is true: (1) the store exceeds ~10 observables, or (2) two distinct feature domains exist in the same module (e.g. `auth` handling both login and user profile). Name split stores after the feature: `login.store.ts`, `profile.store.ts`.
-
-**Entity file split rule** — never put multiple entities in one file. Each entity gets its own file (e.g. `exercise.entity.ts`, `lesson.entity.ts`). All raw API interfaces (`IExercise`, `ILesson`, etc.) live in a single `interfaces.ts` alongside the entities — never inside an entity class file. Each entity class must extend `BaseApiMappedEntity`, call `makeAutoObservable(this)` in its constructor, declare typed public properties with default values, and implement `setFromApiModel()`.
-
-**UseCase store access rule** — use cases must never inject or access a store directly. If a use case needs to read data from a store (including another module's store), it must do so through a Repository method. Add a getter method to the relevant Repository (e.g. `getSelectedTopicId()`) and inject that Repository into the use case instead of the store.
-
-**Single IStore parameter rule** — controllers, presenters, and repositories must each accept exactly one parameter: the global `IStore` from `src/app/store.ts`. Never pass individual module stores (e.g. `HomeStore`, `LessonStore`) as separate constructor arguments. Internally, access the needed slice via `store.homeStore`, `store.lessonStore`, etc. Containers instantiate these classes with just `store` (from `useContext(StoreContext)`).
-
-**Controller-to-UseCase rule** — controllers must never call repository methods directly. Every store mutation, no matter how simple, must be routed through a use case: `Controller → UseCase → Repository → Store`. If no use case exists for an action, create one.
-
-**Controller getter rule** — controllers must never expose getter methods or return data. Controllers only orchestrate use cases (actions/mutations). All data reads for the UI belong in the Presenter.
-
-**UseCase execute void rule** — `execute()` must always return `void`. Use cases must never return data to their caller. If the result of an execution needs to be observed (e.g. success/failure, completion status), write it to the store via the Repository and expose it through the Presenter.
-
-**UseCase injection rule** — never pass a use case as a constructor argument to another use case. Use case execution always happens in the controller. If two use cases must run in sequence, the controller calls them one after the other; each case guards itself via store state (e.g. `getIsComplete()`) to determine whether it should run.
-
-**Screen AppScreen rule** — every screen component must wrap its container with `AppScreen` from `src/common/ui/app.screen.tsx`. Never render a container directly as the screen root. Always pass `barStyle` and `statusBarBg` (from `Colors`) to `AppScreen`.
-
-**Screen navigation rule** — all `navigation.navigate`, `navigation.replace`, and `navigation.goBack` calls must live in the screen component. Define `navigateTo<Destination>` functions in the screen and pass them as callbacks to the container. Containers must never import or call `navigation` directly — they receive typed callback props instead.
-
-```tsx
-const FooScreen: React.FC<IScreenContainer> = ({ navigation }) => {
-  const navigateToBar = () => navigation.navigate(ScreenNames.BarScreen);
-  const navigateBack = () => navigation.goBack();
-
-  return (
-    <AppScreen barStyle="dark-content" statusBarBg={Colors.background}>
-      <FooContainer onNavigateToBar={navigateToBar} onBack={navigateBack} />
-    </AppScreen>
-  );
-};
-```
 
 **NativeWind styling rule** — feature views are styled exclusively with NativeWind `className` and semantic color utilities (`bg-primary`, `text-primary`). The palette lives in `src/common/palette.js` (consumed by `tailwind.config.js` and re-exported as `Colors` from `src/common/colors.ts` for non-className props like `statusBarBg` and navigation themes). Never use `StyleSheet.create()` in new views; never use arbitrary hex values in classNames (`bg-[#007AFF]` is forbidden — add the color to `palette.js` instead). Prefer the shared primitives (`AppButton`, `AppTextInput`, `AppDialog` in `src/common/ui/`) over hand-rolled buttons/inputs/dialogs.
 

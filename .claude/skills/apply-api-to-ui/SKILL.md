@@ -48,7 +48,7 @@ For each generated file, follow these project-specific logic rules:
 
 ## 🔗 Phase 4: UI Wiring
 
-- **Container:** Use `useContext(StoreContext)`. Wrap the return in `<Observer>`. Internal handler functions must be defined **outside** the `Observer` render callback — above the return statement. After `await controller.x()`, read outcome via `presenter.isSuccess()` / `presenter.getErrorMessage()` and call `showToast` here — not in the UseCase. **Never read from the store directly in a Container** — always go through the Presenter (e.g. `presenter.isLoading()`, not `store.auth.isLoading`).
+- **Container:** Use `useContext(StoreContext)`. Wrap the return in `<Observer>`. Internal handler functions must be defined **outside** the `Observer` render callback — above the return statement. After `await controller.x()`, read outcome via `presenter.isSuccess()` / `presenter.getErrorMessage()` and call `showToast` here — not in the UseCase. **Never read from the store directly in a Container** — always go through the Presenter (e.g. `presenter.isLoading()`, not `store.auth.isLoading`). **Exactly one controller and one presenter per Container** — instantiate each once (e.g. `const controller = new LoginController(store)`, `const presenter = new LoginPresenter(store)`). If the Container needs actions/data from another feature, add the methods to the existing controller/presenter instead of instantiating a second one; never declare two controllers or two presenters in the same Container.
 - **View:** Update `I<Name>ViewModel` to include `isLoading` and `error`. Render an `ActivityIndicator` if loading.
 
 ### Function naming convention
@@ -104,3 +104,4 @@ interface ILoginViewModel {
 - [ ] Controller exposes no getters and returns no data — data reads belong in the Presenter.
 - [ ] Props callbacks use `on` prefix; internal handlers use `handle` prefix.
 - [ ] Navigation functions in Screens use `navigateTo<Destination>` prefix (e.g. `navigateToHome`, not `handleDeleteSuccess`).
+- [ ] Container declares exactly one controller instance and one presenter instance — no duplicate controller/presenter instantiations.

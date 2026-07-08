@@ -27,6 +27,7 @@ Never use `yarn screen` or interactive `yarn component` prompts for this skill. 
 **Container → View rule:**
 
 - Container is the `Observer` wrapper — owns `visible`/`onDismiss` state and store wiring. **Never access the store directly in a Container** — all state reads must go through the Presenter (e.g. `presenter.isLoading()`, never `store.module.isLoading`). If a Presenter method is missing, add it to the Presenter first.
+- **Exactly one controller and one presenter per Container.** If API wiring is added later (see `apply-api-to-ui`), instantiate a single `controller` and single `presenter` — never declare a second controller or presenter in the same Container.
 - Handler functions that do **not** read observables must be defined **outside** the `Observer` render callback — at module level or above the component return — so they are not recreated on every render.
 - **Function naming:** props callbacks use `on` prefix (`onLogin`, `onDelete`); internal handlers use `handle` prefix (`handleLogin`, `handleDelete`).
 - View is pure UI — no store access, all data via its `IXxxViewModel` interface.
