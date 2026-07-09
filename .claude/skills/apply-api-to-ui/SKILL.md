@@ -51,6 +51,21 @@ For each generated file, follow these project-specific logic rules:
 - **Container:** Use `useContext(StoreContext)`. Wrap the return in `<Observer>`. Internal handler functions must be defined **outside** the `Observer` render callback — above the return statement. After `await controller.x()`, read outcome via `presenter.isSuccess()` / `presenter.getErrorMessage()` and call `showToast` here — not in the UseCase. **Never read from the store directly in a Container** — always go through the Presenter (e.g. `presenter.isLoading()`, not `store.auth.isLoading`). **Exactly one controller and one presenter per Container** — instantiate each once (e.g. `const controller = new LoginController(store)`, `const presenter = new LoginPresenter(store)`). If the Container needs actions/data from another feature, add the methods to the existing controller/presenter instead of instantiating a second one; never declare two controllers or two presenters in the same Container.
 - **View:** Update `I<Name>ViewModel` to include `isLoading` and `error`. Render an `ActivityIndicator` if loading.
 
+## 🧹 Phase 5: Mock Data Cleanup
+
+**Rule:** Only perform this phase after the real API call has been verified end-to-end — gateway wired, use case executing, data flowing through Repository → Store → Presenter → View, and the screen renders live data successfully. If wiring fails, is untested, or the endpoint isn't reachable yet, **leave the mock data in place** and do not proceed with this phase.
+
+Once wiring is confirmed successful:
+
+1.  **Locate mock sources** tied to this specific API/feature:
+    - Hardcoded mock arrays/objects in the View or Container (e.g. `const mockLessons = [...]`).
+    - `.mock` / `mock()` static helpers or fixtures on the entity (e.g. `<Entity>.mock`) that were only used to fake this data before the API existed.
+    - Mock imports (e.g. `import { mockX } from './mock-data'`) and now-unused mock data files, if nothing else references them.
+    - Any `isLoading`/data fallback logic that exists only to display mock data.
+2.  **Remove only what's replaced:** Delete mock data/usages exclusively for the feature just wired. Never remove mocks still used by other unwired features, Storybook stories, or tests.
+3.  **Verify no dangling references:** After removal, search the module for the mock identifier/file to confirm nothing else imports it before deleting the file itself.
+4.  **Do not delete test fixtures** — `*.test.ts` files may legitimately use mock entities/data for unit testing; this phase only targets mocks used to fake real UI data.
+
 ### Function naming convention
 
 | Location                              | Prefix                    | Example                               |
@@ -105,3 +120,4 @@ interface ILoginViewModel {
 - [ ] Props callbacks use `on` prefix; internal handlers use `handle` prefix.
 - [ ] Navigation functions in Screens use `navigateTo<Destination>` prefix (e.g. `navigateToHome`, not `handleDeleteSuccess`).
 - [ ] Container declares exactly one controller instance and one presenter instance — no duplicate controller/presenter instantiations.
+- [ ] Mock data for this feature removed **only if** the API call was verified working and wired to the UI — left in place otherwise; other features' mocks and test fixtures are untouched.
